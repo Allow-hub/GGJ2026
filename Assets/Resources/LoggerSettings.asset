@@ -18,14 +18,6 @@ MonoBehaviour:
     displayName: Default
     color: {r: 1, g: 1, b: 1, a: 1}
     enabledByDefault: 1
-  - categoryId: state
-    displayName: State Machine
-    color: {r: 0.3, g: 0.8, b: 0.3, a: 1}
-    enabledByDefault: 1
-  - categoryId: input
-    displayName: Input System
-    color: {r: 0.8, g: 0.3, b: 0.3, a: 1}
-    enabledByDefault: 1
   defaultCategory:
     categoryId: default
     displayName: Default

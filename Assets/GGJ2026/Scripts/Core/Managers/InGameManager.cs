@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using GGJ2026.InGame;
 using TechC.VBattle.Core;
 using UnityEngine;
 
@@ -12,6 +13,16 @@ namespace GGJ2026.Core.Managers
     {
         [SerializeField] private float gameDuration = 180f;
 
+        private EventBus eventBus;
+        public EventBus EventBus
+        {
+            get
+            {
+                if (eventBus == null)
+                    eventBus = new EventBus();
+                return eventBus;
+            }
+        }
         public InGameState CurrentState { get; private set; }
 
         [SerializeField, ReadOnly] private float currentTime;
@@ -24,6 +35,7 @@ namespace GGJ2026.Core.Managers
         public override void Init()
         {
             base.Init();
+            eventBus = new EventBus();
 
             currentTime = gameDuration;
             currentFloor = 1;
@@ -86,6 +98,7 @@ namespace GGJ2026.Core.Managers
 
         private void OnRewardStart()
         {
+            eventBus.Publish(new InGameEvent.OnRewardStartEvent());
             // 報酬UI表示 + 10秒カウント
         }
 
