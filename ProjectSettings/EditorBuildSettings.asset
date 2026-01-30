@@ -6,6 +6,9 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
-    path: Assets/GGJ2026/Scenes/SampleScene.unity
-    guid: 99c9720ab356a0642a771bea13969a05
+    path: Assets/GGJ2026/Scenes/MainScene.unity
+    guid: 453ca747fb2fe8e4c969baeb52307902
+  - enabled: 1
+    path: Assets/GGJ2026/Scenes/ManagerScene.unity
+    guid: f15cd6c570c5401488701cc12bf75d9e
   m_configObjects: {}

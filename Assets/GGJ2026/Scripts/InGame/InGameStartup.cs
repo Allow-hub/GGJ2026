@@ -11,9 +11,11 @@ namespace GGJ2026.InGame
     public class InGameStartup : MonoBehaviour
     {
         [SerializeField] private InGameManager inGameManager;
+        [SerializeField] private UiManager uiManager;
         private void Awake()
         {
             inGameManager.Init();
+            uiManager.Init();
         }
     }
 }

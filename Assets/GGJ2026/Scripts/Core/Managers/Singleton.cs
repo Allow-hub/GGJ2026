@@ -1,6 +1,6 @@
 using UnityEngine;
  
-namespace TechC.VBattle.Core.Managers
+namespace GGJ2026.Core.Managers
 {
     /// <summary>
     /// シングルトンの基底クラス,シーンをまたがない場合は明示的な初期化が必要
@@ -49,12 +49,12 @@ namespace TechC.VBattle.Core.Managers
 
             I = this as T;
             isInitialized = true;
-            I.Init();
 
             if (UseDontDestroyOnLoad)
             {
                 DontDestroyOnLoad(this.gameObject);
             }
+            Init();
         }
 
         private void OnDestroy()
