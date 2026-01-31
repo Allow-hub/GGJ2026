@@ -1,4 +1,5 @@
 using System;
+using GGJ2026.Core.Audio;
 using GGJ2026.Events;
 using GGJ2026.InGame;
 using TMPro;
@@ -219,22 +220,25 @@ namespace GGJ2026.Core.Managers
         // 各強化が実行されたときの処理
         private void OnHpImproved()
         {
+            AudioManager.I.PlaySE(SEID.ButtonClick);
             InGameManager.I.EventBus.Publish(new ImproveEvents(PlayerParam.Health, hpLevel));
         }
 
         private void OnAttackImproved()
         {
+            AudioManager.I.PlaySE(SEID.ButtonClick);
             InGameManager.I.EventBus.Publish(new ImproveEvents(PlayerParam.AttackPower, attackLevel));
         }
 
         private void OnSpeedImproved()
         {
+            AudioManager.I.PlaySE(SEID.ButtonClick);
             InGameManager.I.EventBus.Publish(new ImproveEvents(PlayerParam.Agility, speedLevel));
         }
 
         private void OnHealImproved()
         {
-            Debug.Log("Heal Improved");
+            AudioManager.I.PlaySE(SEID.ButtonClick);
             // InGameManager.I.EventBus.Publish(new ImproveEvents(PlayerParam.Heal, healLevel));
         }
 
@@ -249,6 +253,7 @@ namespace GGJ2026.Core.Managers
                 InGameManager.I.EventBus.Publish(new OnRewardSelectedEvent(currentRewardItems[index]));
                 // リワードUIを非表示
                 Set(rewardCanvasGroup, false);
+                AudioManager.I.PlaySE(SEID.ButtonClick);
                 InGameManager.I.OnRewardFinish();
             }
         }
@@ -283,9 +288,9 @@ namespace GGJ2026.Core.Managers
         private void SetRewardView(int index, ItemInstance rewardItem)
         {
             rewardText[index].text =
-                $"ActiveSkill {rewardItem.Config.activeSkill.skillName}\n" +
+                $"ActiveSkill\n{rewardItem.Config.activeSkill.skillName}\n" +
                 $"{rewardItem.Config.activeSkill.description}\n" +
-                $"PassiveSkill {rewardItem.PassiveSkill.Config._skillName}\n" +
+                $"PassiveSkill\n{rewardItem.PassiveSkill.Config._skillName}\n" +
                 $"{rewardItem.PassiveSkill.GetDescription()}\n";
 
             rewardImage[index].sprite = rewardItem.Config.itemSprite;

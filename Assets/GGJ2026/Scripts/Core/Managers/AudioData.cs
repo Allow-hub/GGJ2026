@@ -22,6 +22,7 @@ namespace GGJ2026.Core.Audio
     {
         None = -1,
         ButtonClick,
+        Miss,
         Start,
         Attack,
         Damage
