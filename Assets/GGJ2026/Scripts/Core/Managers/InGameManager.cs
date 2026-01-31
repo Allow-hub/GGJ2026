@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using GGJ2026.InGame;
 using TechC.VBattle.Core;
+using TMPro;
 using UnityEngine;
 
 namespace GGJ2026.Core.Managers
@@ -12,6 +13,7 @@ namespace GGJ2026.Core.Managers
     public class InGameManager : Singleton<InGameManager>
     {
         [SerializeField] private float gameDuration = 180f;
+        [SerializeField] private TextMeshProUGUI countdownText; //カウントダウンテキスト
 
         private EventBus eventBus;
         public EventBus EventBus
@@ -63,7 +65,7 @@ namespace GGJ2026.Core.Managers
             switch (next)
             {
                 case InGameState.Start:
-                    OnStart();
+                    StartCoroutine(OnStart());
                     break;
 
                 case InGameState.FloorStart:
@@ -80,9 +82,19 @@ namespace GGJ2026.Core.Managers
             }
         }
 
-        private void OnStart()
+        private IEnumerator OnStart()
         {
+            countdownText.text = "3";
+            yield return new WaitForSeconds(1f);
+            countdownText.text = "2";
+            yield return new WaitForSeconds(1f);
+            countdownText.text = "1";
+            yield return new WaitForSeconds(1f);
+            countdownText.text = "Start!";
+            yield return new WaitForSeconds(1f);
             ChangeState(InGameState.FloorStart);
+            yield return new WaitForSeconds(1f);
+            countdownText.text = "";
         }
 
         private void OnFloorStart()

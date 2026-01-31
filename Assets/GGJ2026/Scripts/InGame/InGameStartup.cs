@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using GGJ2026.Core.Managers;
+using GGJ2026.InGame.Enemy;
 using UnityEngine;
 
 namespace GGJ2026.InGame
@@ -13,11 +14,13 @@ namespace GGJ2026.InGame
         [SerializeField] private InGameManager inGameManager;
         [SerializeField] private UiManager uiManager;
         [SerializeField] private EnemyManager enemyManager;
+        [SerializeField] private EnemyFactory enemyFactory;
         private void Awake()
         {
             inGameManager.Init();
             uiManager.Init();
             enemyManager.Init();
+            enemyFactory.Init();
         }
     }
 }
