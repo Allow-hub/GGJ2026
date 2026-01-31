@@ -154,7 +154,7 @@ namespace GGJ2026.InGame.Enemy
         private void OnDeath()
         {
             Debug.Log($"Enemy defeated on Floor {floor}");
-            EnemyFactory.I.DecrementEnemyCount();// 敵数を減らす
+            EnemyFactory.I.DecrementEnemyCount(this);// 敵数を減らす
             // 死亡時の処理（アニメーション、ドロップなど）
             Destroy(gameObject);
         }

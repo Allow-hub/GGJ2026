@@ -25,16 +25,26 @@ namespace GGJ2026.InGame.Enemy
         [SerializeField] private Transform spawnPoint;
 
         /// <summary>
+        /// 現存している敵のリスト
+        /// </summary>
+        private List<EnemyController> currentEnemies = new List<EnemyController>();
+
+        /// <summary>
         /// 現存している敵の数
         /// </summary>
-        public int CurrentEnemyCount { get; private set; } = 0;
+        public int CurrentEnemyCount => currentEnemies.Count;
+
+        /// <summary>
+        /// 現存している敵のリスト（読み取り専用）
+        /// </summary>
+        public IReadOnlyList<EnemyController> CurrentEnemies => currentEnemies.AsReadOnly();
 
         protected override bool UseDontDestroyOnLoad => false;
 
         public override void Init()
         {
             base.Init();
-            CurrentEnemyCount = 0;
+            currentEnemies.Clear();
         }
 
         /// <summary>
@@ -69,7 +79,7 @@ namespace GGJ2026.InGame.Enemy
 
             enemy.Init(hp, atk, agl, floor);
 
-            IncrementEnemyCount();
+            AddEnemy(enemy);
 
             return enemy;
         }
@@ -104,25 +114,40 @@ namespace GGJ2026.InGame.Enemy
 
             enemy.Init(hp, atk, agl, floor);
 
-            IncrementEnemyCount();
+            AddEnemy(enemy);
 
             return enemy;
         }
 
         /// <summary>
-        /// 敵数を減らす（敵死亡時などに呼ぶ）
+        /// 敵をリストに追加
         /// </summary>
-        public void DecrementEnemyCount()
+        private void AddEnemy(EnemyController enemy)
         {
-            CurrentEnemyCount = Mathf.Max(CurrentEnemyCount - 1, 0);
-            if (CurrentEnemyCount == 0)
-                InGameManager.I.ChangeState(InGameState.Reward);
+            if (!currentEnemies.Contains(enemy))
+                currentEnemies.Add(enemy);
         }
 
         /// <summary>
-        /// 敵数を増やす
+        /// 敵数を減らす（指定した敵を削除）
         /// </summary>
-        private void IncrementEnemyCount() => CurrentEnemyCount++;
+        public void DecrementEnemyCount(EnemyController enemy)
+        {
+            if (currentEnemies.Remove(enemy))
+            {
+                if (CurrentEnemyCount == 0)
+                    InGameManager.I.ChangeState(InGameState.Reward);
+            }
+        }
+
+        /// <summary>
+        /// すべての敵をクリア
+        /// </summary>
+        public void ClearAllEnemies()
+        {
+            currentEnemies.Clear();
+        }
+
         /// <summary>
         /// 階層に応じたステータス計算
         /// </summary>
