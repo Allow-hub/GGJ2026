@@ -12,12 +12,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4546cdf0fa4743f5a3abb20fdac0f82b, type: 3}
   m_Name: testpassiveskill2
   m_EditorClassIdentifier: 
-  _skillName: 
+  _skillName: "\u30B9\u30D4\u30FC\u30C9\u30A2\u30C3\u30D7"
   baseWeight: 10
-  _modifierType: 0
+  _modifierType: 3
   _targetItemParam: 0
-  _targetPlayerParam: 0
+  _targetPlayerParam: 2
   _targetActiveSkillParam: 0
   _targetGameRuleParam: 0
-  _minValue: 0
-  _maxValue: 0
+  _minValue: -20
+  _maxValue: 20
