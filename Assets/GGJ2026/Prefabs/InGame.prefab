@@ -1223,10 +1223,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bbcab707c4824832b85320c1c86131a9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  allItemConfig: []
+  allItemConfig:
+  - {fileID: 11400000, guid: 0eb1a51cdda341144ae897670fe8dcdd, type: 2}
+  - {fileID: 11400000, guid: d705ecc25c685634ca03c807cbf189ea, type: 2}
   allPassiveSkillPool:
   - {fileID: 11400000, guid: 8ffa5cb57b1c94343bf7777026b4b9a3, type: 2}
   - {fileID: 11400000, guid: 38bf1b4a662340e4bbf10e3cbea9c7be, type: 2}
+  itemContainer: {fileID: 839964001688801996}
+  gridView: {fileID: 5924401519896384223}
+  minSpawnRadius: 600
+  maxSpawnRadius: 800
 --- !u!1 &2509731528350928788
 GameObject:
   m_ObjectHideFlags: 0
