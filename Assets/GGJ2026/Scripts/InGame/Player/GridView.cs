@@ -57,7 +57,7 @@ namespace GGJ2026.InGame
             gridSystem.PlaceItem(config, x, y);
             if (itemInstance.PassiveSkill != null)
             {
-                PlayerManager.I.ApplyPassiveEffect(itemInstance.PassiveSkill, true);
+                //PlayerManager.I.ApplyPassiveEffect(itemInstance.PassiveSkill, true);
             }
             
             Vector2 pos = GetLocalPosFromGrid(x, y, config); 
@@ -72,7 +72,7 @@ namespace GGJ2026.InGame
             gridSystem.RemoveItem(draggable.Config, draggable.CurrentGridX, draggable.CurrentGridY);
             if (draggable.Instance.PassiveSkill != null)
             {
-                PlayerManager.I.ApplyPassiveEffect(draggable.Instance.PassiveSkill, isEquip: false);
+                PlayerController.I.ApplyPassiveEffect(draggable.Instance.PassiveSkill, isEquip: false);
             }
         }
 
@@ -104,7 +104,7 @@ namespace GGJ2026.InGame
                 SnapItemToGrid(draggable, x, y);
                 if (draggable.Instance.PassiveSkill != null)
                 {
-                    PlayerManager.I.ApplyPassiveEffect(draggable.Instance.PassiveSkill, isEquip: true);
+                    PlayerController.I.ApplyPassiveEffect(draggable.Instance.PassiveSkill, isEquip: true);
                 }
                 Debug.Log($"Item Placed at [{x},{y}]");
                 return true; 
