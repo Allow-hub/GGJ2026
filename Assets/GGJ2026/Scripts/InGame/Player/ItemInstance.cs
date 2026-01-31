@@ -12,17 +12,15 @@ namespace GGJ2026.InGame
         public PassiveSkillInstance(PassiveSkillConfig config)
         {
             Config = config;
-            // 生成時にランダムな値（補正値）を決定
             Value = Random.Range(config._minValue, config._maxValue);
         }
 
         public string GetDescription()
         {
-            return $"{Config._skillName}: {Config._modifierType} +{Value:F1}";
+            return $"{Config._skillName}: {Config._modifierType} {Value:F1}";
         }
     }
-
-    // アクティブスキル実体（変更なし）
+    
     public class ActiveSkillInstance
     {
         public ActiveSkillConfig Config { get; private set; }
@@ -47,14 +45,12 @@ namespace GGJ2026.InGame
             Debug.Log($"Used Skill: {Config.skillName}");
         }
     }
-
-    // アイテム実体（★ここを修正）
+    
     public class ItemInstance
     {
         public ItemConfig Config { get; private set; }
         public ActiveSkillInstance ActiveSkill { get; private set; }
-
-        // ★修正: リストをやめて、1つだけ持つように変更
+        
         public PassiveSkillInstance PassiveSkill { get; private set; }
 
         public ItemInstance(ItemConfig config)
@@ -66,8 +62,7 @@ namespace GGJ2026.InGame
         {
             ActiveSkill = skill;
         }
-
-        // ★修正: 追加(Add)ではなくセット(Set)に変更
+        
         public void SetPassiveSkill(PassiveSkillInstance skill)
         {
             PassiveSkill = skill;

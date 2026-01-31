@@ -22,23 +22,6 @@ namespace GGJ2026.InGame
             rootCanvas = GetComponentInParent<Canvas>();
         }
         
-        //Debug------------------------------
-        [Header("Debug")]
-        [SerializeField] private ItemConfig testItem1x1;
-        [SerializeField] private ItemConfig testItem2x1;
-
-        private void Start()
-        {
-            if (testItem1x1 != null)
-            {
-                SpawnItem(testItem1x1, 0, 0);
-            }
-            
-            if (testItem2x1 != null)
-            {
-                SpawnItem(testItem2x1, 0, 1);
-            }
-        }
 
         public void SpawnItem(ItemConfig config, int x, int y)
         {
@@ -55,17 +38,12 @@ namespace GGJ2026.InGame
             draggable.Initialize(itemInstance, this, x, y);
 
             gridSystem.PlaceItem(config, x, y);
-            if (itemInstance.PassiveSkill != null)
-            {
-                //PlayerManager.I.ApplyPassiveEffect(itemInstance.PassiveSkill, true);
-            }
             
             Vector2 pos = GetLocalPosFromGrid(x, y, config); 
             draggable.UpdatePosition(x, y, pos);
             
             obj.transform.localScale = Vector3.one;
         }
-        //Debug------------------------------
 
         public void OnItemPickedUp(DraggableItem draggable)
         {

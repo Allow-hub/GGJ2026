@@ -10,13 +10,13 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: ecec297d7bd4485a936623430269342c, type: 3}
-  m_Name: testItem2
+  m_Name: testMask1
   m_EditorClassIdentifier: 
-  itemName: "\u30DE\u30B9\u30AF2"
-  prefab: {fileID: 4695934697342305019, guid: 6fc6d4fa1e147a74babcff0eeba4c1f0, type: 3}
+  itemName: "\u30DE\u30B9\u30AF1"
+  itemSprite: {fileID: 21300000, guid: 58624c23859396540ae198a4ca70ce97, type: 3}
+  prefab: {fileID: 4695934697342305019, guid: 81b4de5fb3ac329419b155f23d7d64b5, type: 3}
   shape:
   - {x: 0, y: 0}
-  - {x: 1, y: 0}
   elementType: 0
   price: 0
   activeSkill: {fileID: 0}

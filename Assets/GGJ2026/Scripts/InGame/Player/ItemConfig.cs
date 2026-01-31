@@ -8,6 +8,8 @@ namespace GGJ2026.InGame
     {
         [Header("アイテム名")]
         public string itemName;
+        [Header("スプライト")] 
+        public Sprite itemSprite;
         [Header("アイテムプレハブ")]
         public GameObject prefab;
         [Header("アイテム形状")]

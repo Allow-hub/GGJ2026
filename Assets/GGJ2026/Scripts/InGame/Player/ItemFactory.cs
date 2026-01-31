@@ -4,17 +4,35 @@ using GGJ2026.Core.Managers; // Singletonの場所に合わせて変更してく
 using UnityEngine;
 
 namespace GGJ2026.InGame
-{
-public class ItemFactory : Singleton<ItemFactory>
+{ 
+    public class ItemFactory : Singleton<ItemFactory>
     {
         protected override bool UseDontDestroyOnLoad => false;
-
-        // 抽選候補となるパッシブスキルの全リスト
+        
+        [Header("パッシブスキルリスト")]
+        [SerializeField] private List<ItemConfig> allItemConfig;
+        
+        // 抽選候補となるパッシブスキル
+        [Header("パッシブスキルリスト")]
         [SerializeField] private List<PassiveSkillConfig> allPassiveSkillPool;
+        
 
         private new void Awake()
         {
             InitializeSingleton();
+        }
+
+        public ItemInstance ChooseItem()
+        {
+            if (allItemConfig == null || allItemConfig.Count == 0)
+            {
+                Debug.LogWarning("ItemFactory: 抽選用のItemConfigリストが空です。");
+                return null;
+            }
+            int index = Random.Range(0, allItemConfig.Count);
+            ItemConfig selectedConfig = allItemConfig[index];
+
+            return CreateItem(selectedConfig);
         }
 
         /// <summary>

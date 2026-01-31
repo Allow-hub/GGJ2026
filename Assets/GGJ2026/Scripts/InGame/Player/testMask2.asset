@@ -10,10 +10,11 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: ecec297d7bd4485a936623430269342c, type: 3}
-  m_Name: testItem
+  m_Name: testMask2
   m_EditorClassIdentifier: 
-  itemName: "\u30DE\u30B9\u30AF1"
-  prefab: {fileID: 4695934697342305019, guid: 81b4de5fb3ac329419b155f23d7d64b5, type: 3}
+  itemName: 
+  itemSprite: {fileID: 0}
+  prefab: {fileID: 0}
   shape:
   - {x: 0, y: 0}
   elementType: 0
