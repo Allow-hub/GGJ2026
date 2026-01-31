@@ -16,7 +16,9 @@ namespace GGJ2026.InGame.Enemy
     {
         [Header("ステータス")]
         private int maxHP;
+        public int MaxHP => maxHP;
         [SerializeField, ReadOnly] private int currentHP;
+        public int CurrentHP => currentHP;
         private int atk;
         private int agl;
         private int floor;
@@ -101,7 +103,7 @@ namespace GGJ2026.InGame.Enemy
 
             // EventBusを通じて攻撃イベントを発行
             // InGameManager.I.EventBus.Publish(new AttackEvents(this, ));
-            
+
             Debug.Log($"Enemy on Floor {floor} is attacking! (Damage: {atk})");
         }
 

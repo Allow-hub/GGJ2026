@@ -1,5 +1,4 @@
 using System.Collections;
-using System.Collections.Generic;
 using GGJ2026.InGame;
 using GGJ2026.InGame.Enemy;
 using TechC.VBattle.Core;
@@ -15,6 +14,7 @@ namespace GGJ2026.Core.Managers
     {
         [SerializeField] private float gameDuration = 180f;
         [SerializeField] private TextMeshProUGUI countdownText; //カウントダウンテキスト
+        [SerializeField] private CanvasGroup canvasGroup;
 
         private EventBus eventBus;
         public EventBus EventBus
@@ -88,6 +88,7 @@ namespace GGJ2026.Core.Managers
 
         private IEnumerator OnStart()
         {
+            canvasGroup.interactable = false;
             countdownText.text = "3";
             yield return new WaitForSeconds(1f);
             countdownText.text = "2";
@@ -99,6 +100,7 @@ namespace GGJ2026.Core.Managers
             ChangeState(InGameState.FloorStart);
             yield return new WaitForSeconds(1f);
             countdownText.text = "";
+            canvasGroup.interactable = true;
         }
 
         private void OnFloorStart()
