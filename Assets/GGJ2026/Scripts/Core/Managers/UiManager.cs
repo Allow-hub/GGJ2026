@@ -246,7 +246,7 @@ namespace GGJ2026.Core.Managers
             rewardText[index].text =
                 $"ActiveSkill {rewardItem.ActiveSkill.Config.skillName}\n" +
                 $"{rewardItem.ActiveSkill.Config.description}\n" +
-                $"Cooltime {rewardItem.ActiveSkill.Config.skillCoolTime}\n" +
+                //$"Cooltime {rewardItem.ActiveSkill.Config.skillCoolTime}\n" +
                 $"PassiveSkill {rewardItem.PassiveSkill.Config._skillName}\n" +
                 $"{rewardItem.PassiveSkill.GetDescription()}\n";
 
