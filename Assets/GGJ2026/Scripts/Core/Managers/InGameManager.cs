@@ -16,6 +16,7 @@ namespace GGJ2026.Core.Managers
         [SerializeField] private TextMeshProUGUI countdownText; //カウントダウンテキスト
         [SerializeField] private CanvasGroup canvasGroup;
         [SerializeField] private PlayerController playerController;
+        public PlayerController PlayerController => playerController;
         [SerializeField] private int basePt;
         [SerializeField] private float floorBonusRate = 0.1f; // 1フロアごとに+10%
         private float pointMultiplier = 1;//pt倍率
