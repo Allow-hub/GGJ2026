@@ -573,6 +573,11 @@ PrefabInstance:
       propertyPath: m_AnchoredPosition.y
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 6591576714051432098, guid: 139c1629d5f8a264d9ba9907d75adc37,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 6933018010914766187, guid: 139c1629d5f8a264d9ba9907d75adc37,
         type: 3}
       propertyPath: m_AnchorMax.y
@@ -611,6 +616,11 @@ PrefabInstance:
     - target: {fileID: 7163105833381602660, guid: 139c1629d5f8a264d9ba9907d75adc37,
         type: 3}
       propertyPath: m_AnchoredPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7304220712043069424, guid: 139c1629d5f8a264d9ba9907d75adc37,
+        type: 3}
+      propertyPath: m_IsActive
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8334408644244411149, guid: 139c1629d5f8a264d9ba9907d75adc37,
@@ -664,7 +674,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &1863421635
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -1,11 +1,12 @@
-﻿using UnityEngine;
+﻿using GGJ2026.Core.Managers;
+using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 namespace GGJ2026.InGame
 {
     [RequireComponent(typeof(CanvasGroup))]
-    public class DraggableItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHandler
+    public class DraggableItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHandler, IPointerClickHandler
     {
         public ItemInstance Instance { get; private set; }
         public ItemConfig Config => Instance?.Config;
@@ -74,6 +75,11 @@ namespace GGJ2026.InGame
                     Controller.RevertPlacement(this, CurrentGridX, CurrentGridY); // ← 正解
                 }
             }
+        }
+        
+        public void OnPointerClick(PointerEventData eventData)
+        {
+            UiManager.I.OpenMaskDescriptionPopup(true, Instance);
         }
 
         public void UpdatePosition(int x, int y, Vector2 localPos)
