@@ -12,10 +12,12 @@ namespace GGJ2026.InGame
     {
         [SerializeField] private InGameManager inGameManager;
         [SerializeField] private UiManager uiManager;
+        [SerializeField] private EnemyManager enemyManager;
         private void Awake()
         {
             inGameManager.Init();
             uiManager.Init();
+            enemyManager.Init();
         }
     }
 }

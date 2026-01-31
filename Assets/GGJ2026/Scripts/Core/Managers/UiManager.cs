@@ -1,6 +1,8 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using GGJ2026.InGame;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -19,6 +21,12 @@ namespace GGJ2026.Core.Managers
         [SerializeField] private CanvasGroup gridCanvasGroup;//マスクグリッド
         [SerializeField] private Button openImproveMenuButton;//強化メニューを開くボタン
         [SerializeField] private Button closeImproveMenuButton;//強化メニューを閉じ
+
+        [Header("リワード関連")]
+        [SerializeField] private CanvasGroup rewardCanvasGroup;//リワードUI
+        [SerializeField] private TextMeshProUGUI[] rewardText = new TextMeshProUGUI[3];//リワードテキスト
+        [SerializeField] private Image[] rewardImage = new Image[3];//リワード画像
+
         protected override bool UseDontDestroyOnLoad => false;
 
         public override void Init()
@@ -27,6 +35,8 @@ namespace GGJ2026.Core.Managers
             ShowGrid();
             openImproveMenuButton.onClick.AddListener(() => ShowImproveMenu());
             closeImproveMenuButton.onClick.AddListener(() => ShowGrid());
+            Set(rewardCanvasGroup, false);
+            InGameManager.I.EventBus.Subscribe<InGameEvent.OnRewardStartEvent>(e => ShowReward());
         }
 
         private void ShowImproveMenu()
@@ -39,6 +49,12 @@ namespace GGJ2026.Core.Managers
         {
             Set(improveMenuCanvasGroup, false);
             Set(gridCanvasGroup, true);
+        }
+
+        private void ShowReward()
+        {
+            Set(rewardCanvasGroup, true);
+            //マスクの内容を受け取れるようになったらリワード内容の設定をしてください
         }
 
         /// <summary>

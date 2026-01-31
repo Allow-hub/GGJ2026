@@ -96,6 +96,7 @@ namespace GGJ2026.Core.Managers
             // 敵スポーン通知
         }
 
+        [ContextMenu("Test OnRewardStart")]
         private void OnRewardStart()
         {
             eventBus.Publish(new InGameEvent.OnRewardStartEvent());
