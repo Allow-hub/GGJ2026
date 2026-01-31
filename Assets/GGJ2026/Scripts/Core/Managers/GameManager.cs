@@ -1,3 +1,4 @@
+using GGJ2026.Core.Audio;
 using UnityEngine;
 
 namespace GGJ2026.Core.Managers
@@ -47,6 +48,7 @@ namespace GGJ2026.Core.Managers
             switch (state)
             {
                 case GameState.Title:
+                    AudioManager.I.PlayBGM(BGMID.Title);
                     currentRoot = Instantiate(titlePrefab);
                     SetAliveTimer(0);
                     SetResultFloor(0);
