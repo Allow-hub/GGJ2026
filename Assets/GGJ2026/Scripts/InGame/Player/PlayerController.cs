@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using GGJ2026.Core.Managers;
 using GGJ2026.Events;
+using GGJ2026.InGame.Enemy;
 using GGJ2026.InGame.Events;
 using GGJ2026.Interface;
 using Unity.Collections;
@@ -140,7 +141,7 @@ namespace GGJ2026.InGame
             if (InGameManager.IsValid() && InGameManager.I.EventBus != null)
             {
                 // 必要であればここでEventBusにPublish
-                // InGameManager.I.EventBus.Publish(new PlayerAttackEvent(this));
+                InGameManager.I.EventBus.Publish(new AttackEvents(this, EnemyFactory.I.CurrentEnemies[0]));
             }
 
             Debug.Log($"Player attacks! (Damage: {attackPower})");
@@ -237,10 +238,17 @@ namespace GGJ2026.InGame
             }
         }
         
-        // デバッグ用GUI
         private void OnGUI()
         {
-            GUILayout.BeginArea(new Rect(10, 10, 250, 250), "Debug: Player Status", GUI.skin.window);
+            float width = 250f;
+            float height = 250f;
+            float margin = 10f;
+
+            // 画面の高さからウィンドウの高さとマージンを引くことで「左下」のY座標を算出
+            float y = Screen.height - height - margin;
+
+            // 左下の座標を指定
+            GUILayout.BeginArea(new Rect(margin, y, width, height), "Debug: Player Status", GUI.skin.window);
 
             GUILayout.Label($"HP: {currentHp} / {maxHp}");
             GUILayout.Label($"Speed: {Speed}");
