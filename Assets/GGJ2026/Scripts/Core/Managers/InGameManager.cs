@@ -15,6 +15,9 @@ namespace GGJ2026.Core.Managers
         [SerializeField] private float gameDuration = 180f;
         [SerializeField] private TextMeshProUGUI countdownText; //カウントダウンテキスト
         [SerializeField] private CanvasGroup canvasGroup;
+        [SerializeField] private int basePt;
+        [SerializeField] private float floorBonusRate = 0.1f; // 1フロアごとに+10%
+        private float pointMultiplier = 1;//pt倍率
 
         private EventBus eventBus;
         public EventBus EventBus
@@ -44,7 +47,7 @@ namespace GGJ2026.Core.Managers
 
             currentTime = gameDuration;
             currentFloor = 1;
-            aliveTimer =0;
+            aliveTimer = 0;
             ChangeState(InGameState.Start);
         }
 
@@ -117,6 +120,9 @@ namespace GGJ2026.Core.Managers
 
         private void OnRewardStart()
         {
+            float floorMultiplier = 1f + (currentFloor - 1) * floorBonusRate;
+            var pt = basePt * pointMultiplier * floorMultiplier;
+            PointManager.I.AddPoints((int)pt);
             var item_1 = ItemFactory.I.ChooseItem();
             var item_2 = ItemFactory.I.ChooseItem();
             var item_3 = ItemFactory.I.ChooseItem();
@@ -145,6 +151,8 @@ namespace GGJ2026.Core.Managers
             currentFloor++;
             ChangeState(InGameState.FloorStart);
         }
+
+        public void SetPointMultiplier(float value) => pointMultiplier = value;
     }
 
 
