@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using GGJ2026.InGame;
+using GGJ2026.InGame.Enemy;
 using TechC.VBattle.Core;
 using TMPro;
 using UnityEngine;
@@ -99,13 +100,14 @@ namespace GGJ2026.Core.Managers
 
         private void OnFloorStart()
         {
+            // 敵スポーン
+            EnemyFactory.I.CreateEnemy(currentFloor);
             // フロア演出
             ChangeState(InGameState.Battle);
         }
 
         private void OnBattleStart()
         {
-            // 敵スポーン通知
         }
 
         [ContextMenu("Test OnRewardStart")]
