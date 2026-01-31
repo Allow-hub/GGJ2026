@@ -30,6 +30,8 @@ namespace GGJ2026.Core.Managers
 
         [SerializeField, ReadOnly] private float currentTime;
         public float CurrentTime => currentTime;
+
+        private float aliveTimer = 0;
         [SerializeField, ReadOnly] private int currentFloor;
         public int CurrentFloor => currentFloor;
 
@@ -42,7 +44,7 @@ namespace GGJ2026.Core.Managers
 
             currentTime = gameDuration;
             currentFloor = 1;
-
+            aliveTimer =0;
             ChangeState(InGameState.Start);
         }
 
@@ -51,6 +53,7 @@ namespace GGJ2026.Core.Managers
             if (CurrentState == InGameState.Result) return;
 
             currentTime -= Time.deltaTime;
+            aliveTimer += Time.deltaTime;
 
             if (currentTime <= 0f)
             {
@@ -110,23 +113,24 @@ namespace GGJ2026.Core.Managers
         {
         }
 
-        [ContextMenu("Test OnRewardStart")]
         private void OnRewardStart()
         {
             var item_1 = ItemFactory.I.ChooseItem();
             var item_2 = ItemFactory.I.ChooseItem();
             var item_3 = ItemFactory.I.ChooseItem();
 
-            Debug.Log($"Reward Items:\n1: {item_1.Config.itemName}\n2: {item_2.Config.itemName}\n3: {item_3.Config.itemName}");
             // 報酬UI表示 + 10秒カウント
             eventBus.Publish(new InGameEvent.OnRewardStartEvent(item_1, item_2, item_3));
         }
 
+        [ContextMenu("End")]
         private void EndGame()
         {
+            GameManager.I.SetAliveTimer(aliveTimer);
+            GameManager.I.SetResultFloor(currentFloor);
             ChangeState(InGameState.Result);
             //失敗の演出の数秒後リザルト画面を表示
-            // GameManager.I.ChangeResultState();
+            GameManager.I.ChangeResultState();
         }
 
         public void OnBattleClear()

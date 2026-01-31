@@ -16,6 +16,11 @@ namespace GGJ2026.Core.Managers
         private GameObject currentRoot;
         private GameState currentState = GameState.Title;
 
+        private int resultFloor = 0;
+        public int ResultFloor => resultFloor;
+        private float aliveTime = 0;
+        public float AliveTimer => aliveTime;
+
         protected override bool UseDontDestroyOnLoad => true;
 
         public override void Init()
@@ -43,6 +48,8 @@ namespace GGJ2026.Core.Managers
             {
                 case GameState.Title:
                     currentRoot = Instantiate(titlePrefab);
+                    SetAliveTimer(0);
+                    SetResultFloor(0);
                     if (ScoreManager.I == null) break;
                     ScoreManager.I.ResetScore();//スコアをリセット
                     if (PointManager.I == null) break;
@@ -50,6 +57,8 @@ namespace GGJ2026.Core.Managers
                     break;
 
                 case GameState.InGame:
+                    SetAliveTimer(0);
+                    SetResultFloor(0);
                     currentRoot = Instantiate(inGamePrefab);
                     break;
 
@@ -71,6 +80,10 @@ namespace GGJ2026.Core.Managers
                 currentRoot = null;
             }
         }
+
+        public void SetAliveTimer(float t) => aliveTime = t;
+        public void SetResultFloor(int f) => resultFloor = f;
+
 
         [ContextMenu("ChangeTitleState")]
         public void ChangeTitleState()  => ChangeState(GameState.Title);
