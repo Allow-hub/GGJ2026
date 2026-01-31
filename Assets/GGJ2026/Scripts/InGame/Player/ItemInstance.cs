@@ -24,25 +24,14 @@ namespace GGJ2026.InGame
     public class ActiveSkillInstance
     {
         public ActiveSkillConfig Config { get; private set; }
-        private float currentCoolTime;
+        private float currentMultipler;
+        private float currentprobability;
 
         public ActiveSkillInstance(ActiveSkillConfig config)
         {
             Config = config;
-            currentCoolTime = 0f;
-        }
-
-        public bool IsReady => currentCoolTime <= 0f;
-
-        public void UpdateCooldown(float deltaTime)
-        {
-            if (currentCoolTime > 0f) currentCoolTime -= deltaTime;
-        }
-
-        public void Use()
-        {
-            currentCoolTime = Config.skillCoolTime;
-            Debug.Log($"Used Skill: {Config.skillName}");
+            currentMultipler = config.multipler;
+            currentprobability = config.probability;
         }
     }
     

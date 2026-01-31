@@ -11,7 +11,8 @@ namespace GGJ2026.InGame
 
         [Header("References")]
         [SerializeField] private RectTransform gridOrigin; 
-        [SerializeField] private RectTransform itemContainer; 
+        [SerializeField] private RectTransform itemContainer;
+        public RectTransform ItemContainer => itemContainer;
 
         private GridSystem gridSystem; 
         private Canvas rootCanvas;

@@ -1,0 +1,19 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 48b75b39882547ceb70bae2d58ee5f4c, type: 3}
+  m_Name: testActiveSkill
+  m_EditorClassIdentifier: 
+  skillName: "\u30C6\u30B9\u30C8\u306E\u30A2\u30AF\u30C6\u30A3\u30D6\u30B9\u30AD\u30EB"
+  description: "\u3053\u308C\u306F\u30C6\u30B9\u30C8\u3067\u3059"
+  effectTarget: 0
+  multipler: 2
+  probability: 50
