@@ -52,5 +52,19 @@ namespace GGJ2026.InGame
                 SelectedObject = selectedObject;
             }
         }
+        /// <summary>
+        /// パッシブスキル適用/解除イベント
+        /// </summary>
+        public readonly struct PassiveEffectEvent
+        {
+            public readonly PassiveSkillInstance Skill;
+            public readonly bool IsEquip; // true:装備(加算), false:解除(減算)
+
+            public PassiveEffectEvent(PassiveSkillInstance skill, bool isEquip)
+            {
+                Skill = skill;
+                IsEquip = isEquip;
+            }
+        }
     }
 }

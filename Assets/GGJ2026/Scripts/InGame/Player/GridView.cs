@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using GGJ2026.Core.Managers;
+using UnityEngine;
 
 namespace GGJ2026.InGame
 {
@@ -12,8 +13,9 @@ namespace GGJ2026.InGame
         [Header("References")]
         [SerializeField] private RectTransform gridOrigin; 
         [SerializeField] private RectTransform itemContainer;
-        public RectTransform ItemContainer => itemContainer;
         
+
+        public RectTransform ItemContainer => itemContainer;
 
         private GridSystem gridSystem; 
         private Canvas rootCanvas;
@@ -28,22 +30,22 @@ namespace GGJ2026.InGame
         {
             SpawnDebugItem();
         }
+
         private void SpawnDebugItem()
         {
             ItemInstance instance = ItemFactory.I.ChooseItem();
 
-            // ランダムな位置を最大10回試行して、置ける場所を探す
             bool placed = false;
             for (int tryCount = 0; tryCount < 10; tryCount++)
             {
                 int x = Random.Range(0, width);
                 int y = Random.Range(0, height);
 
-                // Configを使ってサイズ判定
                 if (gridSystem.CanPlaceItem(instance.Config, x, y))
                 {
-                    // ★修正: 生成済みの instance を渡す
-                    SpawnItem(instance.Config, x, y);
+                    // ★修正: instanceをそのまま渡す形に変更
+                    // (ここでConfigだけ渡すと、SpawnItem内で再抽選されてしまい、スキルが変わるため)
+                    SpawnItem(instance, x, y);
                     placed = true;
                     break;
                 }
@@ -55,22 +57,27 @@ namespace GGJ2026.InGame
             }
         }
         
-
-        public void SpawnItem(ItemConfig config, int x, int y)
+        public void SpawnItem(ItemInstance instance, int x, int y)
         {
+            ItemConfig config = instance.Config;
+
             if (!gridSystem.CanPlaceItem(config, x, y))
             {
                 Debug.LogWarning("初期配置に失敗：場所が空いていません");
                 return;
             }
-            ItemInstance itemInstance = ItemFactory.I.CreateItem(config);
 
             GameObject obj = Instantiate(config.prefab, itemContainer);
             DraggableItem draggable = obj.GetComponent<DraggableItem>();
 
-            draggable.Initialize(itemInstance, this, x, y);
+            draggable.Initialize(instance, this, x, y);
 
             gridSystem.PlaceItem(config, x, y);
+
+            if (instance.PassiveSkill != null)
+            {
+                InGameManager.I.EventBus.Publish(new InGameEvent.PassiveEffectEvent(instance.PassiveSkill, true));
+            }
             
             Vector2 pos = GetLocalPosFromGrid(x, y, config); 
             draggable.UpdatePosition(x, y, pos);
@@ -81,9 +88,10 @@ namespace GGJ2026.InGame
         public void OnItemPickedUp(DraggableItem draggable)
         {
             gridSystem.RemoveItem(draggable.Config, draggable.CurrentGridX, draggable.CurrentGridY);
+            
             if (draggable.Instance.PassiveSkill != null)
             {
-                PlayerController.I.ApplyPassiveEffect(draggable.Instance.PassiveSkill, isEquip: false);
+                InGameManager.I.EventBus.Publish(new InGameEvent.PassiveEffectEvent(draggable.Instance.PassiveSkill, false));
             }
         }
 
@@ -113,10 +121,12 @@ namespace GGJ2026.InGame
             {
                 gridSystem.PlaceItem(draggable.Config, x, y);
                 SnapItemToGrid(draggable, x, y);
+                
                 if (draggable.Instance.PassiveSkill != null)
                 {
-                    PlayerController.I.ApplyPassiveEffect(draggable.Instance.PassiveSkill, isEquip: true);
+                    InGameManager.I.EventBus.Publish(new InGameEvent.PassiveEffectEvent(draggable.Instance.PassiveSkill, true));
                 }
+
                 Debug.Log($"Item Placed at [{x},{y}]");
                 return true; 
             }

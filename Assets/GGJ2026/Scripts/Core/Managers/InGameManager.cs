@@ -15,6 +15,7 @@ namespace GGJ2026.Core.Managers
         [SerializeField] private float gameDuration = 180f;
         [SerializeField] private TextMeshProUGUI countdownText; //カウントダウンテキスト
         [SerializeField] private CanvasGroup canvasGroup;
+        [SerializeField] private PlayerController playerController;
 
         private EventBus eventBus;
         public EventBus EventBus

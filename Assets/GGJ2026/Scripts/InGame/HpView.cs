@@ -51,9 +51,8 @@ namespace GGJ2026.InGame
                 return;
             }
 
-            // int maxHp = isEnemy // ? enemyController.MaxHP // : playerController.MaxHp; //プロパティを更新したら修正 
-            int maxHp = isEnemy ? enemyController.MaxHP : 0;
-
+            int maxHp = isEnemy ? enemyController.MaxHP : playerController.MaxHp; //プロパティを更新したら修正 
+            
             slider.maxValue = maxHp;
 
             int currentHp = isEnemy

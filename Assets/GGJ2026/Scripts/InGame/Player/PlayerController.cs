@@ -1,102 +1,170 @@
 using System.Collections;
 using System.Collections.Generic;
-using GGJ2026.Core.Managers; // Singleton<T>のために必要
+using GGJ2026.Core.Managers;
+using GGJ2026.Events;
 using GGJ2026.InGame.Events;
 using GGJ2026.Interface;
-using TechC.VBattle.Core;
+using Unity.Collections;
 using UnityEngine;
 
 namespace GGJ2026.InGame
 {
     /// <summary>
     /// プレイヤーコントローラー
+    /// Singletonを廃止し、EnemyControllerと同様の構成に変更
     /// </summary>
-    // ★ここを修正しました
-    public class PlayerController : Singleton<PlayerController>, IAttackable, IDamageable
+    public class PlayerController : MonoBehaviour, IAttackable, IDamageable
     {
         [Header("Player Stats")]
         [SerializeField] private int maxHp = 100;
+        
+        [SerializeField, ReadOnly] private int currentHp;
         [SerializeField] private float speed = 10f; 
         [SerializeField] private int attackPower = 5; 
+        
+        [Header("Growth Settings (LvUP時の上昇値)")] // ★追加
+        [SerializeField] private int hpGrowthPerLevel = 20;
+        [SerializeField] private int atkGrowthPerLevel = 2;
+        [SerializeField] private float speedGrowthPerLevel = 1.0f;
 
         [Header("Attack Settings")]
         [SerializeField] private float baseAttackInterval = 2.0f; 
         private float attackTimer = 0f;
         private float currentAttackInterval;
 
-        public int CurrentHp { get; private set; }
+        // 外部公開用のプロパティ
+        public int MaxHp => maxHp;
+        public int CurrentHp => currentHp;
         public float Speed => speed;
         public int AttackPower => attackPower;
 
+        // IAttackable 実装
         int IAttackable.Damage => attackPower;
-        public bool IsAlive => CurrentHp > 0;
+        public bool IsAlive => currentHp > 0;
         
-        // シーン遷移で破棄するため false (Singleton<T>のオーバーライド)
-        protected override bool UseDontDestroyOnLoad => false;
-
-        // 明示的な初期化 (Singleton<T>の仕様)
-        private new void Awake()
+        private void Start()
         {
-            InitializeSingleton();
+            Init();
         }
-
-        public override void Init()
+        
+        /// <summary>
+        /// 初期化処理
+        /// </summary>
+        public void Init()
         {
-            base.Init(); // 基底クラスのInitも呼ぶ
-
             // HP初期化
-            CurrentHp = maxHp;
+            currentHp = maxHp;
 
             // 攻撃間隔の初期計算
             currentAttackInterval = CalculateAttackInterval(speed);
             attackTimer = currentAttackInterval;
+            
+            if (InGameManager.IsValid())
+            {
+                // パッシブスキル着脱イベント
+                InGameManager.I.EventBus.Subscribe<InGameEvent.PassiveEffectEvent>(OnPassiveEffect);
+                
+                // ★追加: 強化イベントの購読
+                InGameManager.I.EventBus.Subscribe<ImproveEvents>(OnImprove);
+            }
 
-            Debug.Log($"Player Initialized. HP: {CurrentHp}, ATK: {attackPower}, SPD: {speed}, Interval: {currentAttackInterval:F2}s");
+            Debug.Log($"Player Initialized. HP: {currentHp}, ATK: {attackPower}, SPD: {speed}, Interval: {currentAttackInterval:F2}s");
+        }
+        
+        private void OnDestroy()
+        {
+            if (InGameManager.IsValid())
+            {
+                InGameManager.I.EventBus.Unsubscribe<InGameEvent.PassiveEffectEvent>(OnPassiveEffect);
+                InGameManager.I.EventBus.Unsubscribe<ImproveEvents>(OnImprove);
+            }
+        }
+        
+        private void OnImprove(ImproveEvents e)
+        {
+
+            switch (e.playerParam)
+            {
+                case PlayerParam.Health:
+                    maxHp += hpGrowthPerLevel;
+                    currentHp += hpGrowthPerLevel; // 最大値が増えた分、現在HPも回復させてあげる（仕様次第）
+                    Debug.Log($"[Improve] MaxHP Up! {maxHp} (+{hpGrowthPerLevel})");
+                    break;
+
+                case PlayerParam.AttackPower:
+                    attackPower += atkGrowthPerLevel;
+                    Debug.Log($"[Improve] Attack Up! {attackPower} (+{atkGrowthPerLevel})");
+                    break;
+
+                case PlayerParam.Agility:
+                    speed += speedGrowthPerLevel;
+                    // Speedが変わったら攻撃間隔を再計算
+                    currentAttackInterval = CalculateAttackInterval(speed);
+                    Debug.Log($"[Improve] Speed Up! {speed} (+{speedGrowthPerLevel})");
+                    break;
+            }
         }
 
         private void Update()
         {
             if (!IsAlive) return;
             
+
             if (InGameManager.IsValid() && InGameManager.I.CurrentState != InGameState.Battle) return;
 
+            // 攻撃タイマー更新
             attackTimer -= Time.deltaTime;
 
             if (attackTimer <= 0f)
             {
                 PublishAttackEvent();
-                attackTimer = currentAttackInterval;
+                attackTimer = currentAttackInterval; // タイマーリセット
             }
         }
 
+        /// <summary>
+        /// Speed(AGL)に応じた攻撃インターバルを計算
+        /// </summary>
         private float CalculateAttackInterval(float agility)
         {
             if (agility <= 0) return baseAttackInterval;
             float interval = baseAttackInterval / (agility / 5f);
-            return Mathf.Max(interval, 0.1f);
+            return Mathf.Max(interval, 0.1f); // 最小0.1秒
         }
 
+        /// <summary>
+        /// 攻撃イベントを発行
+        /// </summary>
         private void PublishAttackEvent()
         {
+            if (InGameManager.IsValid() && InGameManager.I.EventBus != null)
+            {
+                // 必要であればここでEventBusにPublish
+                // InGameManager.I.EventBus.Publish(new PlayerAttackEvent(this));
+            }
+
             Debug.Log($"Player attacks! (Damage: {attackPower})");
         }
 
+        // IAttackable 実装
         public void Attack(IDamageable target)
         {
             if (!IsAlive || target == null) return;
+            Debug.Log($"Player attacks target for {attackPower} damage");
             target.TakeDamage(attackPower);
         }
 
+        // IDamageable 実装
         public void TakeDamage(int damage)
         {
             if (!IsAlive) return;
 
-            CurrentHp -= damage;
-            if (CurrentHp < 0) CurrentHp = 0;
+            currentHp -= damage;
+            if (currentHp < 0) currentHp = 0;
 
-            Debug.Log($"Player Took Damage: {damage}, CurrentHP: {CurrentHp}");
+            Debug.Log($"Player Took Damage: {damage}, CurrentHP: {currentHp}");
 
-            if (CurrentHp == 0)
+            if (currentHp == 0)
             {
                 OnPlayerDead();
             }
@@ -106,10 +174,10 @@ namespace GGJ2026.InGame
         {
             if (!IsAlive) return;
 
-            CurrentHp += amount;
-            if (CurrentHp > maxHp) CurrentHp = maxHp;
+            currentHp += amount;
+            if (currentHp > maxHp) currentHp = maxHp;
 
-            Debug.Log($"Player Healed: {amount}, CurrentHP: {CurrentHp}");
+            Debug.Log($"Player Healed: {amount}, CurrentHP: {currentHp}");
         }
 
         private void OnPlayerDead()
@@ -117,10 +185,19 @@ namespace GGJ2026.InGame
             Debug.Log("Player is Dead.");
             if (InGameManager.IsValid())
             {
+                // ゲームオーバー通知などをここで行う
                 // InGameManager.I.OnPlayerDead(); 
             }
         }
+        
+        private void OnPassiveEffect(InGameEvent.PassiveEffectEvent e)
+        {
+            ApplyPassiveEffect(e.Skill, e.IsEquip);
+        }
 
+        /// <summary>
+        /// パッシブスキルの適用/解除
+        /// </summary>
         public void ApplyPassiveEffect(PassiveSkillInstance skill, bool isEquip)
         {
             if (skill == null) return;
@@ -141,7 +218,8 @@ namespace GGJ2026.InGame
             {
                 case PlayerParam.Health:
                     maxHp += (int)value;
-                    if (CurrentHp > maxHp) CurrentHp = maxHp;
+                    // MaxHP減少時に現在HPが溢れないようにする
+                    if (currentHp > maxHp) currentHp = maxHp;
                     Debug.Log($"MaxHP Changed: {maxHp} ({value})");
                     break;
 
@@ -152,17 +230,19 @@ namespace GGJ2026.InGame
 
                 case PlayerParam.Agility:
                     speed += value;
+                    // Speedが変わったら攻撃間隔を再計算
                     currentAttackInterval = CalculateAttackInterval(speed);
                     Debug.Log($"Speed Changed: {speed} ({value}), New Interval: {currentAttackInterval:F2}s");
                     break;
             }
         }
-
+        
+        // デバッグ用GUI
         private void OnGUI()
         {
             GUILayout.BeginArea(new Rect(10, 10, 250, 250), "Debug: Player Status", GUI.skin.window);
 
-            GUILayout.Label($"HP: {CurrentHp} / {maxHp}");
+            GUILayout.Label($"HP: {currentHp} / {maxHp}");
             GUILayout.Label($"Speed: {Speed}");
             GUILayout.Label($"Interval: {currentAttackInterval:F2}s");
             GUILayout.Label($"Attack: {AttackPower}");
