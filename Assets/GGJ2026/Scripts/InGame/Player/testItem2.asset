@@ -12,10 +12,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ecec297d7bd4485a936623430269342c, type: 3}
   m_Name: testItem2
   m_EditorClassIdentifier: 
-  itemName: 
-  prefab: {fileID: 0}
+  itemName: "\u30DE\u30B9\u30AF2"
+  prefab: {fileID: 4695934697342305019, guid: 6fc6d4fa1e147a74babcff0eeba4c1f0, type: 3}
   shape:
   - {x: 0, y: 0}
+  - {x: 1, y: 0}
   elementType: 0
   price: 0
   activeSkill: {fileID: 0}
