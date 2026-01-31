@@ -51,6 +51,8 @@ namespace GGJ2026.InGame.Enemy
             currentAttackInterval = CalculateAttackInterval(agl);
             attackTimer = currentAttackInterval; // 初回攻撃のタイマーをセット
 
+            InGameManager.I.EventBus.Subscribe<AttackEvents>(e => CheckDamage(e));
+
             Debug.Log($"Enemy initialized on Floor {floor} - HP: {maxHP}, ATK: {atk}, AGL: {agl}, AttackInterval: {currentAttackInterval:F2}s");
         }
 
@@ -65,7 +67,7 @@ namespace GGJ2026.InGame.Enemy
             if (attackTimer <= 0f)
             {
                 // 攻撃イベントをPublish
-                PublishAttackEvent();
+                Attack(InGameManager.I.PlayerController);
 
                 // タイマーをリセット
                 attackTimer = currentAttackInterval;
@@ -91,23 +93,6 @@ namespace GGJ2026.InGame.Enemy
         }
 
         /// <summary>
-        /// 攻撃イベントをEventBusにPublish
-        /// </summary>
-        private void PublishAttackEvent()
-        {
-            if (InGameManager.I == null || InGameManager.I.EventBus == null)
-            {
-                Debug.LogWarning("InGameManager or EventBus is not available");
-                return;
-            }
-
-            // EventBusを通じて攻撃イベントを発行
-            // InGameManager.I.EventBus.Publish(new AttackEvents(this, ));
-
-            Debug.Log($"Enemy on Floor {floor} is attacking! (Damage: {atk})");
-        }
-
-        /// <summary>
         /// 攻撃を実行
         /// </summary>
         /// <param name="target">攻撃対象</param>
@@ -124,9 +109,25 @@ namespace GGJ2026.InGame.Enemy
                 Debug.LogWarning("Attack target is null");
                 return;
             }
+            InGameManager.I.EventBus.Publish(new AttackEvents(this, InGameManager.I.PlayerController));
 
-            Debug.Log($"Enemy attacks for {atk} damage");
-            target.TakeDamage(atk);
+            Debug.Log($"攻撃イベントをPublish");
+            // target.TakeDamage(atk);
+        }
+
+        /// <summary>
+        /// ダメージが正しいかを判定
+        /// </summary>
+        /// <param name="attackEvents">攻撃のイベント</param>
+        private void CheckDamage(AttackEvents attackEvents)
+        {
+            // 自分がターゲットじゃなければ無視
+            if (!ReferenceEquals(attackEvents.Target, this)) return;
+            // 攻撃者が null / 自分自身などのガード（任意）
+            if (attackEvents.Attacker == null || ReferenceEquals(attackEvents.Attacker, this))
+                return;
+
+            TakeDamage(attackEvents.Attacker.Damage);
         }
 
         /// <summary>
