@@ -38,5 +38,19 @@ namespace GGJ2026.InGame
                 SelectedItem = selectedItem;
             }
         }
+        /// <summary>
+        /// メインマスク適用イベント
+        /// </summary>
+        public class ApplyMainMaskEvent
+        {
+            public readonly ItemInstance SelectedItem;
+            public readonly GameObject SelectedObject;
+
+            public ApplyMainMaskEvent(ItemInstance selectedItem,GameObject selectedObject)
+            {
+                SelectedItem = selectedItem;
+                SelectedObject = selectedObject;
+            }
+        }
     }
 }

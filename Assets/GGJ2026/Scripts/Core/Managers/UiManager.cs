@@ -43,6 +43,12 @@ namespace GGJ2026.Core.Managers
         [SerializeField] private int healBasePointCost = 50;   // 回復は高め
         [SerializeField] private float healCostMultiplier = 2.0f;
 
+        [SerializeField] private CanvasGroup maskDescriptionPopupCanvasGroup;//マスク説明ポップアップ
+        [SerializeField] private TextMeshProUGUI maskDescriptionText;//マスク説明テキスト
+        [SerializeField] private Button maskDescriptionCloseButton;//マスク説明ポップアップ閉じるボタン
+        [SerializeField] private Button mainMaskApplyButton;//メインマスクに適用
+        private ItemInstance currentoOpenMaskItem;
+        private GameObject currentoOpenMaskObject;
         [SerializeField] private TextMeshProUGUI floorText;//現在のフロアテキスト
 
         private int lastFloor = 0;
@@ -71,6 +77,11 @@ namespace GGJ2026.Core.Managers
             speedImproveButton.onClick.AddListener(() => TryImprove(ref speedLevel, speedImproveLevelText, OnSpeedImproved));
             healButton.onClick.AddListener(() => TryHealImprove());
 
+            maskDescriptionCloseButton.onClick.AddListener(() => OpenMaskDescriptionPopup(false));
+
+            // メインマスク適用ボタンのリスナー設定
+            mainMaskApplyButton.onClick.AddListener(() => ApplyMainMask());
+
             // リワードボタンのリスナー設定
             for (int i = 0; i < rewardButtons.Length; i++)
             {
@@ -79,7 +90,7 @@ namespace GGJ2026.Core.Managers
             }
 
             Set(rewardCanvasGroup, false);
-            InGameManager.I.EventBus.Subscribe<InGameEvent.OnRewardStartEvent>(e => ShowReward(e));
+            InGameManager.I.EventBus.Subscribe<OnRewardStartEvent>(e => ShowReward(e));
 
             // 初期テキスト更新
             UpdateLevelText();
@@ -250,6 +261,38 @@ namespace GGJ2026.Core.Managers
             rewardImage[index].sprite = rewardItem.Config.itemSprite;
         }
 
+        /// <summary>
+        /// マスクの説明を表示/非表示する
+        /// </summary>
+        /// <param name="open"></param>
+        /// <param name="item"></param>
+        public void OpenMaskDescriptionPopup(bool open, ItemInstance item = null,GameObject obj = null)
+        {
+            if (open)
+            {
+                maskDescriptionText.text =
+                $"ActiveSkill {item.Config.activeSkill.skillName}\n" +
+                $"{item.Config.activeSkill.description}\n" +
+                $"PassiveSkill {item.PassiveSkill.Config._skillName}\n" +
+                $"{item.PassiveSkill.GetDescription()}\n";
+                currentoOpenMaskItem = item;
+                currentoOpenMaskObject = obj;
+            }
+            else
+            {
+                maskDescriptionText.text = "";
+                currentoOpenMaskItem = null;
+                currentoOpenMaskObject = null;
+            }
+            Set(maskDescriptionPopupCanvasGroup, open);
+        }
+
+        
+        private void ApplyMainMask()
+        {
+            InGameManager.I.EventBus.Publish(new ApplyMainMaskEvent(currentoOpenMaskItem, currentoOpenMaskObject));
+            OpenMaskDescriptionPopup(false);
+        }
         /// <summary>
         /// CanvasGroupの表示状態を設定する
         /// </summary>
