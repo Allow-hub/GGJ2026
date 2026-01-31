@@ -1,0 +1,21 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ba5d8471b71a1b64ea9ef52e8c95b482, type: 3}
+  m_Name: Purple
+  m_EditorClassIdentifier: 
+  maskType: 1
+  idleSprites:
+  - {fileID: 21300000, guid: 6343647347a76cc47b09e4bdc8764473, type: 3}
+  - {fileID: 21300000, guid: 1f0158b5d4e5bd84b8599469e333e623, type: 3}
+  - {fileID: 21300000, guid: dfceb5edf462ad5449f485bfb28e4a2d, type: 3}
+  attackSprites: []
+  frameInterval: 0.2

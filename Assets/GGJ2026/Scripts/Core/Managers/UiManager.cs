@@ -220,6 +220,7 @@ namespace GGJ2026.Core.Managers
                 InGameManager.I.EventBus.Publish(new OnRewardSelectedEvent(currentRewardItems[index]));
                 // リワードUIを非表示
                 Set(rewardCanvasGroup, false);
+                InGameManager.I.OnRewardFinish();
             }
         }
 
