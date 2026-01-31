@@ -36,7 +36,6 @@ namespace GGJ2026.InGame
             float distance = Random.Range(minSpawnRadius, maxSpawnRadius);
             
             obj.transform.localPosition = randomDir * distance;
-            obj.transform.localScale = Vector3.one;
             
             DraggableItem draggable = obj.GetComponent<DraggableItem>();
             if (draggable != null)

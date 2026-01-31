@@ -13,6 +13,7 @@ namespace GGJ2026.InGame
         [SerializeField] private RectTransform gridOrigin; 
         [SerializeField] private RectTransform itemContainer;
         public RectTransform ItemContainer => itemContainer;
+        
 
         private GridSystem gridSystem; 
         private Canvas rootCanvas;
@@ -21,6 +22,37 @@ namespace GGJ2026.InGame
         {
             gridSystem = new GridSystem(width, height);
             rootCanvas = GetComponentInParent<Canvas>();
+        }
+        
+        private void Start()
+        {
+            SpawnDebugItem();
+        }
+        private void SpawnDebugItem()
+        {
+            ItemInstance instance = ItemFactory.I.ChooseItem();
+
+            // ランダムな位置を最大10回試行して、置ける場所を探す
+            bool placed = false;
+            for (int tryCount = 0; tryCount < 10; tryCount++)
+            {
+                int x = Random.Range(0, width);
+                int y = Random.Range(0, height);
+
+                // Configを使ってサイズ判定
+                if (gridSystem.CanPlaceItem(instance.Config, x, y))
+                {
+                    // ★修正: 生成済みの instance を渡す
+                    SpawnItem(instance.Config, x, y);
+                    placed = true;
+                    break;
+                }
+            }
+
+            if (!placed)
+            {
+                Debug.LogWarning($"[Debug] {instance.Config.itemName} を配置できる隙間が見つかりませんでした。");
+            }
         }
         
 
