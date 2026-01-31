@@ -19,7 +19,7 @@ MonoBehaviour:
   - {x: 0, y: 0}
   elementType: 0
   price: 0
-  activeSkill: {fileID: 0}
+  activeSkill: {fileID: 11400000, guid: 6e5dfb95387d061439a19e4b751d4cbe, type: 2}
   passiveSkills: {fileID: 0}
   width: 1
   height: 1

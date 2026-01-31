@@ -4,7 +4,6 @@ namespace GGJ2026.InGame
 {
     public class ItemFactoryTester : MonoBehaviour
     {
-
         private void Start()
         {
             // ItemFactoryが存在するかチェック
@@ -16,19 +15,29 @@ namespace GGJ2026.InGame
 
             Debug.Log("--- アイテム生成テスト開始 ---");
 
-            // ファクトリーを使ってアイテムデータを生成
+            // 1. ファクトリーを使ってランダムにアイテムデータを生成 (データ作成)
             ItemInstance item = ItemFactory.I.ChooseItem();
 
-            // 結果をログ出力
-            Debug.Log($"生成されたアイテム: {item.Config.itemName}");
-
-            if (item.PassiveSkill != null)
+            if (item != null)
             {
-                Debug.Log($"[成功] パッシブスキルが付与されました: {item.PassiveSkill.GetDescription()}");
+                // 結果をログ出力
+                Debug.Log($"生成されたアイテムデータ: {item.Config.itemName}");
+
+                if (item.PassiveSkill != null)
+                {
+                    Debug.Log($"[成功] パッシブスキルが付与されました: {item.PassiveSkill.GetDescription()}");
+                }
+                else
+                {
+                    Debug.Log("パッシブスキルは付与されませんでした。");
+                }
+
+                // 2. 生成したデータを使って、実際に画面上にスポーンさせる (表示作成)
+                ItemFactory.I.SpawnItem(item);
             }
             else
             {
-                Debug.Log("パッシブスキルは付与されませんでした。");
+                Debug.LogWarning("ChooseItem でアイテムが生成されませんでした。ItemFactoryのリスト設定を確認してください。");
             }
 
             Debug.Log("--- テスト終了 ---");

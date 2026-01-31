@@ -10,16 +10,18 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: ecec297d7bd4485a936623430269342c, type: 3}
-  m_Name: testMask1
+  m_Name: blue_mask
   m_EditorClassIdentifier: 
-  itemName: "\u30DE\u30B9\u30AF1"
-  itemSprite: {fileID: 21300000, guid: 58624c23859396540ae198a4ca70ce97, type: 3}
-  prefab: {fileID: 4695934697342305019, guid: 81b4de5fb3ac329419b155f23d7d64b5, type: 3}
+  itemName: "\u30D6\u30EB\u30FC\u30DE\u30B9\u30AF"
+  itemSprite: {fileID: 21300000, guid: 0059dacd4addde540842b5caa520504e, type: 3}
+  prefab: {fileID: 4695934697342305019, guid: 58be9cc292a7990439e3e94bfd962b29, type: 3}
   shape:
   - {x: 0, y: 0}
+  - {x: 1, y: 0}
+  - {x: 2, y: 0}
   elementType: 0
   price: 0
-  activeSkill: {fileID: 11400000, guid: 6e5dfb95387d061439a19e4b751d4cbe, type: 2}
+  activeSkill: {fileID: 0}
   passiveSkills: {fileID: 0}
   width: 1
   height: 1

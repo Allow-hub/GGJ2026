@@ -9,17 +9,42 @@ namespace GGJ2026.InGame
     {
         protected override bool UseDontDestroyOnLoad => false;
         
-        [Header("パッシブスキルリスト")]
+        [Header("アイテムデータリスト")]
         [SerializeField] private List<ItemConfig> allItemConfig;
         
-        // 抽選候補となるパッシブスキル
         [Header("パッシブスキルリスト")]
         [SerializeField] private List<PassiveSkillConfig> allPassiveSkillPool;
         
+        [Header("スポーン設定")]
+        [SerializeField] private Transform itemContainer; // アイテムの生成親（Canvas内のItemContainerなど）
+        [SerializeField] private GridView gridView;       // DraggableItemの初期化に必要
+        [SerializeField] private float minSpawnRadius = 600f; // グリッド中心からの最小距離（グリッド枠外になるように調整）
+        [SerializeField] private float maxSpawnRadius = 800f; // グリッド中心からの最大距離
 
         private new void Awake()
         {
             InitializeSingleton();
+        }
+        
+        public void SpawnItem(ItemInstance instance)
+        {
+            Transform parent = itemContainer;
+            
+            GameObject obj = Instantiate(instance.Config.prefab, parent);
+            
+            Vector2 randomDir = Random.insideUnitCircle.normalized;
+            float distance = Random.Range(minSpawnRadius, maxSpawnRadius);
+            
+            obj.transform.localPosition = randomDir * distance;
+            obj.transform.localScale = Vector3.one;
+            
+            DraggableItem draggable = obj.GetComponent<DraggableItem>();
+            if (draggable != null)
+            {
+                draggable.Initialize(instance, gridView, -1, -1);
+            }
+            
+            Debug.Log($"Item Spawned Outside: {instance.Config.itemName} at {obj.transform.localPosition}");
         }
 
         public ItemInstance ChooseItem()
@@ -36,13 +61,10 @@ namespace GGJ2026.InGame
         }
 
         /// <summary>
-        /// アイテムを生成する
+        /// アイテムデータを生成する
         /// </summary>
-        /// <param name="config">ベースのアイテムデータ</param>
-        /// <param name="useRandomPassive">trueならランダムにパッシブを1つ抽選して付ける。falseならConfigの固定パッシブを使う。</param>
         public ItemInstance CreateItem(ItemConfig config)
         {
-            bool useRandomPassive = true;
             if (config == null) return null;
 
             var instance = new ItemInstance(config);
@@ -52,29 +74,16 @@ namespace GGJ2026.InGame
             {
                 instance.SetActiveSkill(new ActiveSkillInstance(config.activeSkill));
             }
-
-            // 2. パッシブスキルの決定（★修正: どちらか1つだけ）
-            if (useRandomPassive)
+            
+            var randomConfig = GetRandomPassiveConfigFromPool();
+            if (randomConfig != null)
             {
-                // ランダムモード: プールから抽選してセット（Configの設定は無視）
-                var randomConfig = GetRandomPassiveConfigFromPool();
-                if (randomConfig != null)
-                {
-                    instance.SetPassiveSkill(new PassiveSkillInstance(randomConfig));
-                }
-            }
-            else if (config.passiveSkills != null)
-            {
-                // 通常モード: Configに設定されている固定パッシブがあればセット
-                instance.SetPassiveSkill(new PassiveSkillInstance(config.passiveSkills));
+                instance.SetPassiveSkill(new PassiveSkillInstance(randomConfig));
             }
 
             return instance;
         }
 
-        /// <summary>
-        /// 重み付き抽選
-        /// </summary>
         private PassiveSkillConfig GetRandomPassiveConfigFromPool()
         {
             if (allPassiveSkillPool == null || allPassiveSkillPool.Count == 0) return null;
