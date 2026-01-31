@@ -113,8 +113,13 @@ namespace GGJ2026.Core.Managers
         [ContextMenu("Test OnRewardStart")]
         private void OnRewardStart()
         {
-            eventBus.Publish(new InGameEvent.OnRewardStartEvent());
+            var item_1 = ItemFactory.I.ChooseItem();
+            var item_2 = ItemFactory.I.ChooseItem();
+            var item_3 = ItemFactory.I.ChooseItem();
+
+            Debug.Log($"Reward Items:\n1: {item_1.Config.itemName}\n2: {item_2.Config.itemName}\n3: {item_3.Config.itemName}");
             // 報酬UI表示 + 10秒カウント
+            eventBus.Publish(new InGameEvent.OnRewardStartEvent(item_1, item_2, item_3));
         }
 
         private void EndGame()

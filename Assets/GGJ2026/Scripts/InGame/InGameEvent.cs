@@ -12,6 +12,31 @@ namespace GGJ2026.InGame
         /// <summary>
         /// 報酬フェーズ開始イベント
         /// </summary>
-        public class OnRewardStartEvent { }
+        public class OnRewardStartEvent
+        {
+            public readonly ItemInstance Item1;
+            public readonly ItemInstance Item2;
+            public readonly ItemInstance Item3;
+
+            public OnRewardStartEvent(ItemInstance item1, ItemInstance item2, ItemInstance item3)
+            {
+                Item1 = item1;
+                Item2 = item2;
+                Item3 = item3;
+            }
+        }
+
+        /// <summary>
+        /// 報酬選択イベント
+        /// </summary>
+        public readonly struct OnRewardSelectedEvent
+        {
+            public readonly ItemInstance SelectedItem;
+
+            public OnRewardSelectedEvent(ItemInstance selectedItem)
+            {
+                SelectedItem = selectedItem;
+            }
+        }
     }
 }

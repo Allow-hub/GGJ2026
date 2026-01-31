@@ -4,6 +4,7 @@ using GGJ2026.InGame;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using static GGJ2026.InGame.InGameEvent;
 
 namespace GGJ2026.Core.Managers
 {
@@ -32,6 +33,7 @@ namespace GGJ2026.Core.Managers
         [SerializeField] private CanvasGroup rewardCanvasGroup;//リワードUI
         [SerializeField] private TextMeshProUGUI[] rewardText = new TextMeshProUGUI[3];//リワードテキスト
         [SerializeField] private Image[] rewardImage = new Image[3];//リワード画像
+        [SerializeField] private Button[] rewardButtons = new Button[3];//リワード選択ボタン
 
         [Header("レベルアップ設定")]
         [SerializeField] private int basePointCost = 10;//基本コスト
@@ -51,6 +53,9 @@ namespace GGJ2026.Core.Managers
         private int speedLevel = 0;
         private int healLevel = 0;
 
+        // リワードアイテムの保持
+        private ItemInstance[] currentRewardItems = new ItemInstance[3];
+
         protected override bool UseDontDestroyOnLoad => false;
 
         public override void Init()
@@ -66,8 +71,15 @@ namespace GGJ2026.Core.Managers
             speedImproveButton.onClick.AddListener(() => TryImprove(ref speedLevel, speedImproveLevelText, OnSpeedImproved));
             healButton.onClick.AddListener(() => TryHealImprove());
 
+            // リワードボタンのリスナー設定
+            for (int i = 0; i < rewardButtons.Length; i++)
+            {
+                int index = i; // クロージャ対策
+                rewardButtons[i].onClick.AddListener(() => OnRewardSelected(index));
+            }
+
             Set(rewardCanvasGroup, false);
-            InGameManager.I.EventBus.Subscribe<InGameEvent.OnRewardStartEvent>(e => ShowReward());
+            InGameManager.I.EventBus.Subscribe<InGameEvent.OnRewardStartEvent>(e => ShowReward(e));
 
             // 初期テキスト更新
             UpdateLevelText();
@@ -186,6 +198,22 @@ namespace GGJ2026.Core.Managers
             // InGameManager.I.EventBus.Publish(new ImproveEvents(PlayerParam.Heal, healLevel));
         }
 
+        /// <summary>
+        /// リワードが選択されたときの処理
+        /// </summary>
+        private void OnRewardSelected(int index)
+        {
+            if (currentRewardItems[index] != null)
+            {
+                // 選択されたアイテムをPublish
+                InGameManager.I.EventBus.Publish(new OnRewardSelectedEvent(currentRewardItems[index]));
+                // リワードUIを非表示
+                Set(rewardCanvasGroup, false);
+                
+                Debug.Log($"Reward {index} selected: {currentRewardItems[index].Config.itemName}");
+            }
+        }
+
         private void ShowImproveMenu()
         {
             Set(improveMenuCanvasGroup, true);
@@ -199,10 +227,30 @@ namespace GGJ2026.Core.Managers
             Set(gridCanvasGroup, true);
         }
 
-        private void ShowReward()
+        private void ShowReward(OnRewardStartEvent onRewardStartEvent)
         {
+            // リワードアイテムを保存
+            currentRewardItems[0] = onRewardStartEvent.Item1;
+            currentRewardItems[1] = onRewardStartEvent.Item2;
+            currentRewardItems[2] = onRewardStartEvent.Item3;
+
+            SetRewardView(0, onRewardStartEvent.Item1);
+            SetRewardView(1, onRewardStartEvent.Item2);
+            SetRewardView(2, onRewardStartEvent.Item3);
+
             Set(rewardCanvasGroup, true);
-            //マスクの内容を受け取れるようになったらリワード内容の設定をしてください
+        }
+
+        private void SetRewardView(int index, ItemInstance rewardItem)
+        {
+            rewardText[index].text =
+                $"ActiveSkill {rewardItem.ActiveSkill.Config.skillName}\n" +
+                $"{rewardItem.ActiveSkill.Config.description}\n" +
+                $"Cooltime {rewardItem.ActiveSkill.Config.skillCoolTime}\n" +
+                $"PassiveSkill {rewardItem.PassiveSkill.Config._skillName}\n" +
+                $"{rewardItem.PassiveSkill.GetDescription()}\n";
+
+            rewardImage[index].sprite = rewardItem.Config.itemSprite;
         }
 
         /// <summary>
