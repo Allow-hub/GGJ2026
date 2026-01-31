@@ -18,6 +18,12 @@ namespace GGJ2026.Core.Managers
             base.Init();
             ResetPoints();
         }
+
+        [ContextMenu("Add 200 Points")]
+        private void Add200Points()
+        {
+            AddPoints(200);
+        }
         public void AddPoints(int value) => points += value;
 
         /// <summary>
