@@ -50,6 +50,7 @@ namespace GGJ2026.Core.Managers
         private ItemInstance currentoOpenMaskItem;
         private GameObject currentoOpenMaskObject;
         [SerializeField] private TextMeshProUGUI floorText;//現在のフロアテキスト
+        [SerializeField] private TextMeshProUGUI hpText, atkText, spdText;
 
         private int lastFloor = 0;
 
@@ -59,6 +60,9 @@ namespace GGJ2026.Core.Managers
         private int speedLevel = 0;
         private int healLevel = 0;
 
+        private int lastHp = 0;
+        private int lastAtk = 0;
+        private float lastSpd = 0;
         // リワードアイテムの保持
         private ItemInstance[] currentRewardItems = new ItemInstance[3];
 
@@ -100,7 +104,7 @@ namespace GGJ2026.Core.Managers
         {
             // ボタンの有効/無効を更新
             UpdateButtonStates();
-
+            UpdateStatusTexts();
             if (InGameManager.I.CurrentFloor != lastFloor)
             {
                 lastFloor = InGameManager.I.CurrentFloor;
@@ -165,6 +169,31 @@ namespace GGJ2026.Core.Managers
             UpdateLevelText(attackImproveLevelText, attackLevel, false);
             UpdateLevelText(speedImproveLevelText, speedLevel, false);
             UpdateLevelText(healLevelText, healLevel, true);
+        }
+
+        private void UpdateStatusTexts()
+        {
+            int hp = InGameManager.I.PlayerController.CurrentHp;
+            int atk = InGameManager.I.PlayerController.AttackPower;
+            float spd = InGameManager.I.PlayerController.Speed;
+
+            if (hp != lastHp)
+            {
+                lastHp = hp;
+                hpText.text = $"{hp}";
+            }
+
+            if (atk != lastAtk)
+            {
+                lastAtk = atk;
+                atkText.text = $"{atk}";
+            }
+
+            if (spd != lastSpd)
+            {
+                lastSpd = spd;
+                spdText.text = spd.ToString("F1");
+            }
         }
 
         /// <summary>
