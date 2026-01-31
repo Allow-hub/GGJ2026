@@ -36,10 +36,14 @@ namespace GGJ2026.Core.Managers
         [Header("レベルアップ設定")]
         [SerializeField] private int basePointCost = 10;//基本コスト
         [SerializeField] private float costMultiplier = 1.5f;//レベルごとのコスト倍率
-        
+
         [Header("HP回復設定")]
         [SerializeField] private int healBasePointCost = 50;   // 回復は高め
         [SerializeField] private float healCostMultiplier = 2.0f;
+
+        [SerializeField] private TextMeshProUGUI floorText;//現在のフロアテキスト
+
+        private int lastFloor = 0;
 
         // 各強化のレベル
         private int hpLevel = 0;
@@ -73,6 +77,12 @@ namespace GGJ2026.Core.Managers
         {
             // ボタンの有効/無効を更新
             UpdateButtonStates();
+
+            if (InGameManager.I.CurrentFloor != lastFloor)
+            {
+                lastFloor = InGameManager.I.CurrentFloor;
+                floorText.text = $"{lastFloor}";
+            }
         }
 
         /// <summary>
