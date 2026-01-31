@@ -209,8 +209,6 @@ namespace GGJ2026.Core.Managers
                 InGameManager.I.EventBus.Publish(new OnRewardSelectedEvent(currentRewardItems[index]));
                 // リワードUIを非表示
                 Set(rewardCanvasGroup, false);
-                
-                Debug.Log($"Reward {index} selected: {currentRewardItems[index].Config.itemName}");
             }
         }
 
@@ -244,8 +242,8 @@ namespace GGJ2026.Core.Managers
         private void SetRewardView(int index, ItemInstance rewardItem)
         {
             rewardText[index].text =
-                $"ActiveSkill {rewardItem.ActiveSkill.Config.skillName}\n" +
-                $"{rewardItem.ActiveSkill.Config.description}\n" +
+                $"ActiveSkill {rewardItem.Config.activeSkill.skillName}\n" +
+                $"{rewardItem.Config.activeSkill.description}\n" +
                 $"PassiveSkill {rewardItem.PassiveSkill.Config._skillName}\n" +
                 $"{rewardItem.PassiveSkill.GetDescription()}\n";
 
