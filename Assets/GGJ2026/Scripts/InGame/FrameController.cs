@@ -16,7 +16,7 @@ namespace GGJ2026.InGame
 
         [SerializeField] private FrameImageSet[] frameImageSets;
 
-        private Dictionary<MaskType, Sprite> frameImageDict = new Dictionary<MaskType, Sprite>();
+        private Dictionary<MaskType, FrameImageSet> frameImageDict = new Dictionary<MaskType, FrameImageSet>();
 
         private Material runtimeMaterial;
         private Coroutine progressCoroutine;
@@ -36,36 +36,42 @@ namespace GGJ2026.InGame
             runtimeMaterial = Instantiate(image.material);
             image.material = runtimeMaterial;
 
-            // Dictionaryの構築
+            // Dictionaryの構築（FrameImageSetごと保存）
             foreach (var set in frameImageSets)
             {
                 if (set.image != null)
                 {
-                    frameImageDict[set.maskType] = set.image;
+                    frameImageDict[set.maskType] = set;
                 }
             }
         }
 
         private void Start()
         {
-            InGameManager.I.EventBus.Subscribe<InGameEvent.ApplyMainMaskEvent>(e => ChangeMask(e));
-        }
-        private void OnDestroy()
-        {
-            if (!InGameManager.IsValid()) return;
-            InGameManager.I.EventBus.Unsubscribe<InGameEvent.ApplyMainMaskEvent>(e => ChangeMask(e));
+            if (InGameManager.IsValid())
+            {
+                InGameManager.I.EventBus.Subscribe<InGameEvent.ApplyMainMaskEvent>(ChangeMask);
+            }
         }
 
+        private void OnDestroy()
+        {
+            if (InGameManager.IsValid())
+            {
+                InGameManager.I.EventBus.Unsubscribe<InGameEvent.ApplyMainMaskEvent>(ChangeMask);
+            }
+        }
 
         private void ChangeMask(InGameEvent.ApplyMainMaskEvent e)
         {
-            if (frameImageDict.TryGetValue(e.SelectedItem.Config.itemName, out var targetImage))
+            if (frameImageDict.TryGetValue(e.SelectedItem.Config.itemName, out var targetSet))
             {
                 // アルファを0に設定
                 runtimeMaterial.SetFloat(ProgressId, 0f);
                 
-                // スプライトを変更
-                image.sprite = targetImage;
+                // スプライトとカラーを変更
+                image.sprite = targetSet.image;
+                image.color = targetSet.color;
                 
                 // 0 → 1 のプログレスアニメーションを開始
                 StartProgress(0f, 1f);
@@ -113,5 +119,6 @@ namespace GGJ2026.InGame
     {
         public MaskType maskType;
         public Sprite image;
+        public Color color = Color.white; // デフォルト値
     }
 }
