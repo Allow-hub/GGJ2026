@@ -33,7 +33,7 @@ namespace GGJ2026.InGame
             if (currentMask == null) return;
 
             timer += Time.deltaTime;
-            
+
             // 現在の状態に応じたフレーム間隔を取得
             float currentFrameInterval = currentState == CharacterAnimState.Idle
                 ? currentMask.idleFrameInterval
@@ -42,7 +42,7 @@ namespace GGJ2026.InGame
             if (timer >= currentFrameInterval)
             {
                 timer = 0f;
-                
+
                 var sprites = GetCurrentSprites();
                 frameIndex++;
 
@@ -72,8 +72,8 @@ namespace GGJ2026.InGame
 
         public void ChangeMask(MaskType maskType)
         {
+            Debug.Log("Aaaa");
             if (!maskDict.TryGetValue(maskType, out var set)) return;
-
             currentMask = set;
             ResetAnimation();
         }

@@ -80,24 +80,41 @@ namespace GGJ2026.Core.Managers
         {
             base.Init();
             ShowGrid();
+            
+            // リスナーを削除してから追加（重複防止）
+            openImproveMenuButton.onClick.RemoveAllListeners();
             openImproveMenuButton.onClick.AddListener(() => ShowImproveMenu());
+            
+            closeImproveMenuButton.onClick.RemoveAllListeners();
             closeImproveMenuButton.onClick.AddListener(() => ShowGrid());
 
             // 強化ボタンのリスナー設定
+            hpImproveButton.onClick.RemoveAllListeners();
             hpImproveButton.onClick.AddListener(() => TryImprove(ref hpLevel, hpImproveLevelText, OnHpImproved));
+            
+            attackImproveButton.onClick.RemoveAllListeners();
             attackImproveButton.onClick.AddListener(() => TryImprove(ref attackLevel, attackImproveLevelText, OnAttackImproved));
+            
+            speedImproveButton.onClick.RemoveAllListeners();
             speedImproveButton.onClick.AddListener(() => TryImprove(ref speedLevel, speedImproveLevelText, OnSpeedImproved));
+            
+            healButton.onClick.RemoveAllListeners();
             healButton.onClick.AddListener(() => TryHealImprove());
 
-            maskDescriptionCloseButton.onClick.AddListener(() => OpenMaskDescriptionPopup(false));
+            maskDescriptionCloseButton.onClick.RemoveAllListeners();
+            maskDescriptionCloseButton.onClick.AddListener(() => OnMaskDescriptionClose());
 
             // メインマスク適用ボタンのリスナー設定
-            mainMaskApplyButton.onClick.AddListener(() => ApplyMainMask());
+            mainMaskApplyButton.onClick.RemoveAllListeners();
+            mainMaskApplyButton.onClick.AddListener(() => OnMainMaskApply());
+            
+            Debug.Log($"[UiManager] mainMaskApplyButton listener added. Button: {mainMaskApplyButton != null}");
 
             // リワードボタンのリスナー設定
             for (int i = 0; i < rewardButtons.Length; i++)
             {
                 int index = i; // クロージャ対策
+                rewardButtons[i].onClick.RemoveAllListeners();
                 rewardButtons[i].onClick.AddListener(() => OnRewardSelected(index));
             }
 
@@ -317,7 +334,7 @@ namespace GGJ2026.Core.Managers
                 // リワードUIを非表示
                 Set(rewardCanvasGroup, false);
                 AudioManager.I.PlaySE(SEID.ButtonClick);
-                InGameManager.I.OnRewardFinish();
+                // InGameManager.I.OnRewardFinish();
             }
         }
 
@@ -386,12 +403,30 @@ namespace GGJ2026.Core.Managers
             Set(maskDescriptionPopupCanvasGroup, open);
         }
 
-
-        private void ApplyMainMask()
+        private void OnMaskDescriptionClose()
         {
-            InGameManager.I.EventBus.Publish(new ApplyMainMaskEvent(currentoOpenMaskItem, currentoOpenMaskObject));
+            Debug.Log("[UiManager] OnMaskDescriptionClose called");
             OpenMaskDescriptionPopup(false);
         }
+
+        private void OnMainMaskApply()
+        {
+            Debug.Log("[UiManager] OnMainMaskApply called!");
+            Debug.Log($"[UiManager] Item: {currentoOpenMaskItem?.Config.itemName}, Object: {currentoOpenMaskObject?.name}");
+            
+            if (currentoOpenMaskItem != null)
+            {
+                InGameManager.I.EventBus.Publish(new ApplyMainMaskEvent(currentoOpenMaskItem, currentoOpenMaskObject));
+                Debug.Log("[UiManager] ApplyMainMaskEvent published");
+            }
+            else
+            {
+                Debug.LogWarning("[UiManager] currentoOpenMaskItem is null!");
+            }
+            
+            OpenMaskDescriptionPopup(false);
+        }
+
         /// <summary>
         /// CanvasGroupの表示状態を設定する
         /// </summary>

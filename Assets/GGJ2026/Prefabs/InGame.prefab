@@ -4503,18 +4503,18 @@ RectTransform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6057145728903650105}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 3714828141032316205}
   - {fileID: 4504304290429726118}
-  m_Father: {fileID: 2657984286142541983}
+  m_Father: {fileID: 631017253375984815}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 620, y: 65}
+  m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!225 &1259229915734812074
@@ -5036,7 +5036,6 @@ RectTransform:
   - {fileID: 4442494908314708723}
   - {fileID: 5685159769733165545}
   - {fileID: 2692335845387551468}
-  - {fileID: 3103334906470007846}
   - {fileID: 7699071930483209072}
   - {fileID: 6422955466936677371}
   - {fileID: 3635809027007718735}
@@ -5367,7 +5366,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 50, y: -50}
+  m_AnchoredPosition: {x: 660, y: -50}
   m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &9056254342985325885
@@ -5388,7 +5387,7 @@ MonoBehaviour:
     m_Top: 0
     m_Bottom: 0
   m_ChildAlignment: 4
-  m_Spacing: 270
+  m_Spacing: 260
   m_ChildForceExpandWidth: 1
   m_ChildForceExpandHeight: 1
   m_ChildControlWidth: 0
@@ -5893,6 +5892,17 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   image: {fileID: 4267129058564320344}
   duration: 1
+  frameImageSets:
+  - maskType: 3
+    image: {fileID: 21300000, guid: 3bada1d838a0152439d7ec6d0cfcd7fa, type: 3}
+  - maskType: 1
+    image: {fileID: 21300000, guid: be75e82ee07b28642a8d6b20cfa40fd1, type: 3}
+  - maskType: 2
+    image: {fileID: 21300000, guid: b2d07e4ca642ca849ace3846ddcb5100, type: 3}
+  - maskType: 4
+    image: {fileID: 21300000, guid: f653e9d3aa7e91e408323cc8bde1fe80, type: 3}
+  - maskType: 0
+    image: {fileID: 21300000, guid: 8f0a26e688eed4c44a4f6cf68dc2175e, type: 3}
 --- !u!1 &7552046514766314817
 GameObject:
   m_ObjectHideFlags: 0
@@ -7568,6 +7578,7 @@ RectTransform:
   m_Children:
   - {fileID: 875624177156535466}
   - {fileID: 7462351355516888510}
+  - {fileID: 3103334906470007846}
   m_Father: {fileID: 1709889586331233591}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
@@ -7614,7 +7625,7 @@ MonoBehaviour:
   m_ReferencePixelsPerUnit: 100
   m_ScaleFactor: 1
   m_ReferenceResolution: {x: 1080, y: 1920}
-  m_ScreenMatchMode: 0
+  m_ScreenMatchMode: 2
   m_MatchWidthOrHeight: 0
   m_PhysicalUnit: 3
   m_FallbackScreenDPI: 96

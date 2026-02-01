@@ -142,7 +142,7 @@ namespace GGJ2026.InGame.Enemy
             currentHP -= damage;
             currentHP = Mathf.Max(0, currentHP);
 
-            Debug.Log($"Enemy took {damage} damage. Remaining HP: {currentHP}/{maxHP}");
+            // Debug.Log($"Enemy took {damage} damage. Remaining HP: {currentHP}/{maxHP}");
 
             if (!IsAlive)
                 OnDeath();
