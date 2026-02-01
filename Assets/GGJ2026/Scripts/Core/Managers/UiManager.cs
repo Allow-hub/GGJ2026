@@ -431,9 +431,11 @@ namespace GGJ2026.Core.Managers
         {
             if (currentoOpenMaskItem == null) return;
             PointManager.I.AddPoints(currentoOpenMaskItem.Config.price);
-            OnMaskDescriptionClose();
+            
             //Sellイベントの送信
             InGameManager.I.EventBus.Publish(new SellMaskEvent(currentoOpenMaskItem, currentoOpenMaskObject));
+            
+            OnMaskDescriptionClose();
         }
 
         /// <summary>

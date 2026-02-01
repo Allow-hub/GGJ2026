@@ -39,6 +39,8 @@ namespace GGJ2026.InGame
             if (InGameManager.IsValid())
             {
                 InGameManager.I.EventBus.Subscribe<InGameEvent.ApplyMainMaskEvent>(OnApplyMainMask);
+                // ★追加: 売却イベントの購読
+                InGameManager.I.EventBus.Subscribe<InGameEvent.SellMaskEvent>(OnSellMask);
             }
         }
 
@@ -47,35 +49,73 @@ namespace GGJ2026.InGame
             if (InGameManager.IsValid())
             {
                 InGameManager.I.EventBus.Unsubscribe<InGameEvent.ApplyMainMaskEvent>(OnApplyMainMask);
+                // ★追加: 購読解除
+                InGameManager.I.EventBus.Unsubscribe<InGameEvent.SellMaskEvent>(OnSellMask);
             }
         }
 
+        // メインマスク適用時の処理
         private void OnApplyMainMask(InGameEvent.ApplyMainMaskEvent e)
         {
-            GameObject targetObj = e.SelectedObject;
-            
-            if (targetObj != null)
+            RemoveAndDestroyItem(e.SelectedObject);
+        }
+
+        // ★追加: マスク売却時の処理
+        private void OnSellMask(InGameEvent.SellMaskEvent e)
+        {
+            Debug.Log("[GridView] OnSellMask received.");
+            RemoveAndDestroyItem(e.SellObject);
+        }
+
+        /// <summary>
+        /// ★共通処理: 指定されたアイテムオブジェクトを安全に削除する
+        /// </summary>
+        private void RemoveAndDestroyItem(GameObject targetObj)
+        {
+            // 1. オブジェクト自体が渡ってきているか確認
+            if (targetObj == null)
             {
-                DraggableItem item = targetObj.GetComponent<DraggableItem>();
-                if (item != null)
+                Debug.LogError("[GridView] RemoveAndDestroyItem Error: targetObj is NULL! (UiManagerから正しく渡せていない可能性があります)");
+                return;
+            }
+
+            Debug.Log($"[GridView] Start removing item: {targetObj.name}");
+
+            DraggableItem item = targetObj.GetComponent<DraggableItem>();
+            if (item != null)
+            {
+                // ケース1: 適用したのが「現在持ち上げているアイテム」の場合
+                if (holdingItem == item)
                 {
+                    Debug.Log("[GridView] Removing HOLDING item.");
+                    holdingItem = null;
+                }
+                // ケース2: 持ち上げていない（グリッドに置いてある）アイテムの場合
+                else
+                {
+                    Debug.Log($"[GridView] Removing PLACED item at [{item.CurrentGridX},{item.CurrentGridY}]");
+                    
+                    // グリッドデータから削除
                     if (item.CurrentGridX != -1 && item.CurrentGridY != -1)
                     {
                         gridSystem.RemoveItem(item.Config, item.CurrentGridX, item.CurrentGridY);
                     }
 
+                    // パッシブ効果を解除
                     if (item.Instance.PassiveSkill != null)
                     {
                         InGameManager.I.EventBus.Publish(new InGameEvent.PassiveEffectEvent(item.Instance.PassiveSkill, false));
                     }
-
-                    if (holdingItem == item)
-                    {
-                        holdingItem = null;
-                    }
                 }
-                Destroy(targetObj);
             }
+            else
+            {
+                Debug.LogWarning($"[GridView] targetObj ({targetObj.name}) does not have DraggableItem component.");
+            }
+            
+            // オブジェクトを完全に削除
+            Destroy(targetObj);
+            Debug.Log($"[GridView] Destroy executed for: {targetObj.name}");
         }
 
         private void Update()
@@ -86,7 +126,6 @@ namespace GGJ2026.InGame
 
                 if (Input.GetMouseButtonDown(0) && Time.time > lastPickupTime + PICKUP_COOLDOWN)
                 {
-                    // ★修正: Update内でのUI判定は削除し、TryPlaceItem内で細かく判定します
                     TryPlaceItem(Input.mousePosition);
                 }
             }
@@ -105,7 +144,6 @@ namespace GGJ2026.InGame
             item.transform.localPosition = localPoint;
         }
         
-        // --- 生成関連 ---
         public void SpawnItem(ItemInstance instance, int x, int y)
         {
             GameObject obj = Instantiate(instance.Config.prefab, itemContainer);
@@ -140,7 +178,6 @@ namespace GGJ2026.InGame
             }
         }
 
-        // --- クリック・配置ロジック ---
         public void OnItemClicked(DraggableItem item)
         {
             if (holdingItem != null) return;
@@ -148,13 +185,11 @@ namespace GGJ2026.InGame
             holdingItem = item;
             lastPickupTime = Time.time; 
 
-            // 詳細ポップアップ表示
             if (UiManager.I != null)
             {
                 UiManager.I.OpenMaskDescriptionPopup(true, item.Instance, item.gameObject);
             }
 
-            // グリッド内にある場合のみ、削除処理とパラメータ減算を行う
             if (item.CurrentGridX != -1 && item.CurrentGridY != -1)
             {
                 gridSystem.RemoveItem(item.Config, item.CurrentGridX, item.CurrentGridY);
@@ -175,21 +210,18 @@ namespace GGJ2026.InGame
         {
             if (holdingItem == null) return;
 
-            // 1. まず「グリッド内」かどうかを判定 (最優先)
+            Vector2 localPoint;
+            RectTransformUtility.ScreenPointToLocalPointInRectangle(
+                itemContainer, screenPosition, GetCanvasCamera(), out localPoint
+            );
+            
+            if (localPoint.y > (height * cellSize))
+            {
+                return;
+            }
+
             if (RectTransformUtility.RectangleContainsScreenPoint(itemContainer, screenPosition, GetCanvasCamera()))
             {
-                // --- グリッド内の場合 ---
-                // ここでは UI判定(IsPointerOverGameObject) は無視して配置処理を行う
-                // (グリッド自体がUIなので、チェックすると弾かれてしまうため)
-
-                Vector2 localPoint;
-                RectTransformUtility.ScreenPointToLocalPointInRectangle(
-                    itemContainer, 
-                    screenPosition, 
-                    GetCanvasCamera(), 
-                    out localPoint
-                );
-                
                 Vector2 itemSize = holdingItem.GetComponent<RectTransform>().sizeDelta;
                 float itemLeftX = localPoint.x - (itemSize.x / 2f);
                 float itemBottomY = localPoint.y - (itemSize.y / 2f);
@@ -211,22 +243,15 @@ namespace GGJ2026.InGame
                 else
                 {
                     Debug.Log($"[GridView] 配置失敗: Grid[{x},{y}]");
-                    // 持ち上げたまま
                 }
             }
             else
             {
-                // --- グリッド外の場合 ---
-                
-                // ★追加: グリッドの外をクリックしたときだけ、UI（ボタンなど）の上かチェックする
                 if (EventSystem.current.IsPointerOverGameObject())
                 {
-                    // ボタンなどをクリックした場合は、「配置もドロップもしない（持ち上げたまま）」
-                    Debug.Log("UI Click detected outside grid. Action ignored.");
                     return;
                 }
 
-                // UIの上でもない（完全な背景/空きスペース）ならドロップ処理
                 Debug.Log("グリッド範囲外をクリック -> 装備を外して配置します");
                 if (PlaceItemOutside(holdingItem))
                 {

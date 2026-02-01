@@ -258,5 +258,66 @@ namespace GGJ2026.InGame
                     break;
             }
         }
+
+        /// <summary>
+        /// メインスキル(ActiveSkill)の効果を適用
+        /// </summary>
+        private void ApplyMainSkillEffect(ActiveSkillInstance skillInstance)
+        {
+            ActiveSkillConfig config = skillInstance.Config;
+
+            // 確率判定 (0～100)
+            float randomValue = UnityEngine.Random.Range(0f, 100f);
+            if (randomValue > config.probability)
+            {
+                Debug.Log($"[MainMask] Skill {config.skillName} Failed (Chance: {config.probability}%)");
+                return;
+            }
+
+            float multiplier = config.multipler;
+            Debug.Log(
+                $"[MainMask] Skill {config.skillName} Applied. Target: {config.effectTarget}, Value: {multiplier}");
+
+            switch (config.effectTarget)
+            {
+                case EffectTarget.Attack:
+                    // 攻撃力を倍率強化 (永続的に乗算する例)
+                    int oldAtk = attackPower;
+                    attackPower = Mathf.RoundToInt(attackPower * multiplier);
+                    Debug.Log($"[MainMask] Attack x{multiplier}: {oldAtk} -> {attackPower}");
+                    break;
+
+                case EffectTarget.Defence:
+                    // Defence は HP回復として扱う
+                    int healAmount = (int)multiplier;
+                    // もし倍率(1.5など)として設定されている場合はMaxHPに対する割合回復にするなど調整可能
+                    if (multiplier < 10f && multiplier > 0f)
+                    {
+                        healAmount = Mathf.RoundToInt(maxHp * multiplier);
+                    }
+
+                    Heal(healAmount);
+                    break;
+
+                case EffectTarget.Time:
+                    // Time は Speed(攻撃速度)アップとして扱う
+                    float oldSpeed = speed;
+                    speed *= multiplier;
+                    currentAttackInterval = CalculateAttackInterval(speed);
+                    Debug.Log($"[MainMask] Speed x{multiplier}: {oldSpeed} -> {speed}");
+                    break;
+
+                case EffectTarget.Point:
+                    // ポイント獲得
+                    if (InGameManager.I != null)
+                    {
+                        InGameManager.I.SetPointMultiplier(multiplier);
+                        Debug.Log($"[MainMask] Points Add: {multiplier}");
+                    }
+
+                    break;
+            }
+        }
     }
+    
 }
