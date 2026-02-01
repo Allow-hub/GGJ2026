@@ -7,7 +7,7 @@ namespace GGJ2026.InGame
     public class ItemConfig : ScriptableObject
     {
         [Header("アイテム名")]
-        public string itemName;
+        public MaskType itemName;
         [Header("スプライト")] 
         public Sprite itemSprite;
         [Header("アイテムプレハブ")]

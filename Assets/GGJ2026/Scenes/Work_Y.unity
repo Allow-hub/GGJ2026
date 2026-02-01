@@ -330,30 +330,10 @@ PrefabInstance:
       propertyPath: m_AnchoredPosition.y
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 2083686356483887877, guid: 139c1629d5f8a264d9ba9907d75adc37,
-        type: 3}
-      propertyPath: m_AnchorMax.x
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 2083686356483887877, guid: 139c1629d5f8a264d9ba9907d75adc37,
-        type: 3}
-      propertyPath: m_AnchorMax.y
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 2083686356483887877, guid: 139c1629d5f8a264d9ba9907d75adc37,
-        type: 3}
-      propertyPath: m_AnchorMin.x
-      value: 1
-      objectReference: {fileID: 0}
     - target: {fileID: 2471678720398342808, guid: 139c1629d5f8a264d9ba9907d75adc37,
         type: 3}
       propertyPath: m_Name
       value: InGame
-      objectReference: {fileID: 0}
-    - target: {fileID: 2471678720398342808, guid: 139c1629d5f8a264d9ba9907d75adc37,
-        type: 3}
-      propertyPath: m_IsActive
-      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 2832417546247289275, guid: 139c1629d5f8a264d9ba9907d75adc37,
         type: 3}
@@ -404,6 +384,61 @@ PrefabInstance:
         type: 3}
       propertyPath: m_AnchoredPosition.y
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4029493776044749375, guid: 139c1629d5f8a264d9ba9907d75adc37,
+        type: 3}
+      propertyPath: frameImageSets.Array.size
+      value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: 4029493776044749375, guid: 139c1629d5f8a264d9ba9907d75adc37,
+        type: 3}
+      propertyPath: frameImageSets.Array.data[0].image
+      value: 
+      objectReference: {fileID: 21300000, guid: 3bada1d838a0152439d7ec6d0cfcd7fa,
+        type: 3}
+    - target: {fileID: 4029493776044749375, guid: 139c1629d5f8a264d9ba9907d75adc37,
+        type: 3}
+      propertyPath: frameImageSets.Array.data[1].image
+      value: 
+      objectReference: {fileID: 21300000, guid: be75e82ee07b28642a8d6b20cfa40fd1,
+        type: 3}
+    - target: {fileID: 4029493776044749375, guid: 139c1629d5f8a264d9ba9907d75adc37,
+        type: 3}
+      propertyPath: frameImageSets.Array.data[2].image
+      value: 
+      objectReference: {fileID: 21300000, guid: b2d07e4ca642ca849ace3846ddcb5100,
+        type: 3}
+    - target: {fileID: 4029493776044749375, guid: 139c1629d5f8a264d9ba9907d75adc37,
+        type: 3}
+      propertyPath: frameImageSets.Array.data[3].image
+      value: 
+      objectReference: {fileID: 21300000, guid: f653e9d3aa7e91e408323cc8bde1fe80,
+        type: 3}
+    - target: {fileID: 4029493776044749375, guid: 139c1629d5f8a264d9ba9907d75adc37,
+        type: 3}
+      propertyPath: frameImageSets.Array.data[4].image
+      value: 
+      objectReference: {fileID: 21300000, guid: 8f0a26e688eed4c44a4f6cf68dc2175e,
+        type: 3}
+    - target: {fileID: 4029493776044749375, guid: 139c1629d5f8a264d9ba9907d75adc37,
+        type: 3}
+      propertyPath: frameImageSets.Array.data[0].maskType
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 4029493776044749375, guid: 139c1629d5f8a264d9ba9907d75adc37,
+        type: 3}
+      propertyPath: frameImageSets.Array.data[1].maskType
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4029493776044749375, guid: 139c1629d5f8a264d9ba9907d75adc37,
+        type: 3}
+      propertyPath: frameImageSets.Array.data[2].maskType
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 4029493776044749375, guid: 139c1629d5f8a264d9ba9907d75adc37,
+        type: 3}
+      propertyPath: frameImageSets.Array.data[3].maskType
+      value: 4
       objectReference: {fileID: 0}
     - target: {fileID: 4082003510897226748, guid: 139c1629d5f8a264d9ba9907d75adc37,
         type: 3}

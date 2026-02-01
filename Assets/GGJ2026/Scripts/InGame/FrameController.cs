@@ -1,4 +1,6 @@
 using System.Collections;
+using System.Collections.Generic;
+using GGJ2026.Core.Managers;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -11,6 +13,10 @@ namespace GGJ2026.InGame
     {
         [SerializeField] private Image image;
         [SerializeField] private float duration = 1.0f;
+
+        [SerializeField] private FrameImageSet[] frameImageSets;
+
+        private Dictionary<MaskType, Sprite> frameImageDict = new Dictionary<MaskType, Sprite>();
 
         private Material runtimeMaterial;
         private Coroutine progressCoroutine;
@@ -29,15 +35,35 @@ namespace GGJ2026.InGame
             // マテリアルを複製（超重要）
             runtimeMaterial = Instantiate(image.material);
             image.material = runtimeMaterial;
+
+            // Dictionaryの構築
+            foreach (var set in frameImageSets)
+            {
+                if (set.image != null)
+                {
+                    frameImageDict[set.maskType] = set.image;
+                }
+            }
         }
 
-        /// <summary>
-        /// 下から上に表示（0 → 1）
-        /// </summary>
-        [ContextMenu("a")]
-        public void Reveal()
+        private void Start()
         {
-            StartProgress(0f, 1f);
+            InGameManager.I.EventBus.Subscribe<InGameEvent.ApplyMainMaskEvent>(e => ChangeMask(e));
+        }
+
+        private void ChangeMask(InGameEvent.ApplyMainMaskEvent e)
+        {
+            if (frameImageDict.TryGetValue(e.SelectedItem.Config.itemName, out var targetImage))
+            {
+                // アルファを0に設定
+                runtimeMaterial.SetFloat(ProgressId, 0f);
+                
+                // スプライトを変更
+                image.sprite = targetImage;
+                
+                // 0 → 1 のプログレスアニメーションを開始
+                StartProgress(0f, 1f);
+            }
         }
 
         /// <summary>
@@ -74,5 +100,12 @@ namespace GGJ2026.InGame
             runtimeMaterial.SetFloat(ProgressId, to);
             progressCoroutine = null;
         }
+    }
+
+    [System.Serializable]
+    public class FrameImageSet
+    {
+        public MaskType maskType;
+        public Sprite image;
     }
 }
