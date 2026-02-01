@@ -10,10 +10,6 @@ using UnityEngine;
 
 namespace GGJ2026.InGame
 {
-    /// <summary>
-    /// プレイヤーコントローラー
-    /// Singletonを廃止し、EnemyControllerと同様の構成に変更
-    /// </summary>
     public class PlayerController : MonoBehaviour, IAttackable, IDamageable
     {
         [Header("Player Stats")]
@@ -23,7 +19,7 @@ namespace GGJ2026.InGame
         [SerializeField] private float speed = 10f; 
         [SerializeField] private int attackPower = 5; 
         
-        [Header("Growth Settings (LvUP時の上昇値)")] // ★追加
+        [Header("Growth Settings (LvUP時の上昇値)")]
         [SerializeField] private int hpGrowthPerLevel = 20;
         [SerializeField] private int atkGrowthPerLevel = 2;
         [SerializeField] private float speedGrowthPerLevel = 1.0f;
@@ -34,13 +30,14 @@ namespace GGJ2026.InGame
         private float attackTimer = 0f;
         private float currentAttackInterval;
 
-        // 外部公開用のプロパティ
+        // ★追加: 現在適用中のメインスキル（アクティブスキル）を保持
+        private ActiveSkillInstance currentMainSkill;
+
         public int MaxHp => maxHp;
         public int CurrentHp => currentHp;
         public float Speed => speed;
         public int AttackPower => attackPower;
 
-        // IAttackable 実装
         int IAttackable.Damage => attackPower;
         public bool IsAlive => currentHp > 0;
         
@@ -49,29 +46,22 @@ namespace GGJ2026.InGame
             Init();
         }
         
-        /// <summary>
-        /// 初期化処理
-        /// </summary>
         public void Init()
         {
-            // HP初期化
             currentHp = maxHp;
-
-            // 攻撃間隔の初期計算
             currentAttackInterval = CalculateAttackInterval(speed);
             attackTimer = currentAttackInterval;
+            currentMainSkill = null; // 初期化
             
             if (InGameManager.IsValid())
             {
-                // パッシブスキル着脱イベント
                 InGameManager.I.EventBus.Subscribe<InGameEvent.PassiveEffectEvent>(OnPassiveEffect);
-                
-                // ★追加: 強化イベントの購読
                 InGameManager.I.EventBus.Subscribe<ImproveEvents>(OnImprove);
                 InGameManager.I.EventBus.Subscribe<AttackEvents>(CheckDamage);
-            }
 
-            //Debug.Log($"Player Initialized. HP: {currentHp}, ATK: {attackPower}, SPD: {speed}, Interval: {currentAttackInterval:F2}s");
+                // メインマスク適用イベントの購読
+                InGameManager.I.EventBus.Subscribe<InGameEvent.ApplyMainMaskEvent>(OnApplyMainMask);
+            }
         }
         
         private void OnDestroy()
@@ -81,42 +71,32 @@ namespace GGJ2026.InGame
                 InGameManager.I.EventBus.Unsubscribe<InGameEvent.PassiveEffectEvent>(OnPassiveEffect);
                 InGameManager.I.EventBus.Unsubscribe<ImproveEvents>(OnImprove);
                 InGameManager.I.EventBus.Unsubscribe<AttackEvents>(CheckDamage);
+                InGameManager.I.EventBus.Unsubscribe<InGameEvent.ApplyMainMaskEvent>(OnApplyMainMask);
             }
         }
 
-
-        
         private void CheckDamage(AttackEvents attackEvents)
         {
-            // ターゲットが自分(Player)でなければ無視
             if (!ReferenceEquals(attackEvents.Target, this)) return;
-            
-            // 攻撃者が自分なら無視（念のため）
             if (ReferenceEquals(attackEvents.Attacker, this)) return;
-
-            // ダメージを受ける
             TakeDamage(attackEvents.Attacker.Damage);
         }
         
         private void OnImprove(ImproveEvents e)
         {
-
             switch (e.playerParam)
             {
                 case PlayerParam.Health:
                     maxHp += hpGrowthPerLevel;
-                    currentHp += hpGrowthPerLevel; // 最大値が増えた分、現在HPも回復させてあげる（仕様次第）
+                    currentHp += hpGrowthPerLevel;
                     Debug.Log($"[Improve] MaxHP Up! {maxHp} (+{hpGrowthPerLevel})");
                     break;
-
                 case PlayerParam.AttackPower:
                     attackPower += atkGrowthPerLevel;
                     Debug.Log($"[Improve] Attack Up! {attackPower} (+{atkGrowthPerLevel})");
                     break;
-
                 case PlayerParam.Agility:
                     speed += speedGrowthPerLevel;
-                    // Speedが変わったら攻撃間隔を再計算
                     currentAttackInterval = CalculateAttackInterval(speed);
                     Debug.Log($"[Improve] Speed Up! {speed} (+{speedGrowthPerLevel})");
                     break;
@@ -126,28 +106,21 @@ namespace GGJ2026.InGame
         private void Update()
         {
             if (!IsAlive) return;
-            
-
             if (InGameManager.IsValid() && InGameManager.I.CurrentState != InGameState.Battle) return;
 
-            // 攻撃タイマー更新
             attackTimer -= Time.deltaTime;
-
             if (attackTimer <= 0f)
             {
                 PublishAttackEvent();
-                attackTimer = currentAttackInterval; // タイマーリセット
+                attackTimer = currentAttackInterval;
             }
         }
 
-        /// <summary>
-        /// Speed(AGL)に応じた攻撃インターバルを計算
-        /// </summary>
         private float CalculateAttackInterval(float agility)
         {
             if (agility <= 0) return baseAttackInterval;
             float interval = baseAttackInterval / (agility / 5f);
-            return Mathf.Max(interval, 0.1f); // 最小0.1秒
+            return Mathf.Max(interval, 0.1f);
         }
 
         /// <summary>
@@ -160,13 +133,35 @@ namespace GGJ2026.InGame
                 characterSpriteAnimator.PlayAttack();
                 AudioManager.I.PlaySE(Core.Audio.SEID.Attack);
                 // 必要であればここでEventBusにPublish
-                InGameManager.I.EventBus.Publish(new AttackEvents(this, EnemyFactory.I.CurrentEnemies[0]));
-            }
 
-            //Debug.Log($"Player attacks! (Damage: {attackPower})");
+                // ★修正: Attackスキルの場合、一時的に攻撃力を上げる
+                int originalAttackPower = attackPower; // 元の攻撃力を保存
+                bool isBuffed = false;
+
+                if (currentMainSkill != null && currentMainSkill.Config.effectTarget == EffectTarget.Attack)
+                {
+                    // 確率判定
+                    float randomValue = UnityEngine.Random.Range(0f, 100f);
+                    if (randomValue <= currentMainSkill.Config.probability)
+                    {
+                        // 倍率適用
+                        attackPower = Mathf.RoundToInt(attackPower * currentMainSkill.Config.multipler);
+                        isBuffed = true;
+                        Debug.Log($"[MainSkill] Attack Boost! {originalAttackPower} -> {attackPower}");
+                    }
+                }
+
+                // イベント発行 (この時点で attackPower は強化されている可能性がある)
+                InGameManager.I.EventBus.Publish(new AttackEvents(this, EnemyFactory.I.CurrentEnemies[0]));
+
+                // ★修正: 攻撃が終わったら元の攻撃力に戻す
+                if (isBuffed)
+                {
+                    attackPower = originalAttackPower;
+                }
+            }
         }
 
-        // IAttackable 実装
         public void Attack(IDamageable target)
         {
             if (!IsAlive || target == null) return;
@@ -174,29 +169,28 @@ namespace GGJ2026.InGame
             target.TakeDamage(attackPower);
         }
 
-        // IDamageable 実装
         public void TakeDamage(int damage)
         {
             if (!IsAlive) return;
 
+            // ★修正: Defenceスキルの場合、ダメージを0.7倍にする
+            if (currentMainSkill != null && currentMainSkill.Config.effectTarget == EffectTarget.Defence)
+            {
+                int originalDmg = damage;
+                damage = Mathf.RoundToInt(damage * 0.7f);
+                Debug.Log($"[MainSkill] Damage Reduced: {originalDmg} -> {damage}");
+            }
+
             currentHp -= damage;
             if (currentHp < 0) currentHp = 0;
-
-            //Debug.Log($"Player Took Damage: {damage}, CurrentHP: {currentHp}");
-
-            if (currentHp == 0)
-            {
-                OnPlayerDead();
-            }
+            if (currentHp == 0) OnPlayerDead();
         }
 
         public void Heal(int amount)
         {
             if (!IsAlive) return;
-
             currentHp += amount;
             if (currentHp > maxHp) currentHp = maxHp;
-
             Debug.Log($"Player Healed: {amount}, CurrentHP: {currentHp}");
         }
 
@@ -214,15 +208,10 @@ namespace GGJ2026.InGame
             ApplyPassiveEffect(e.Skill, e.IsEquip);
         }
 
-        /// <summary>
-        /// パッシブスキルの適用/解除
-        /// </summary>
         public void ApplyPassiveEffect(PassiveSkillInstance skill, bool isEquip)
         {
             if (skill == null) return;
-
             float value = isEquip ? skill.Value : -skill.Value;
-
             switch (skill.Config._modifierType)
             {
                 case ModifierType.PlayerParam:
@@ -237,19 +226,15 @@ namespace GGJ2026.InGame
             {
                 case PlayerParam.Health:
                     maxHp += (int)value;
-                    // MaxHP減少時に現在HPが溢れないようにする
                     if (currentHp > maxHp) currentHp = maxHp;
                     Debug.Log($"MaxHP Changed: {maxHp} ({value})");
                     break;
-
                 case PlayerParam.AttackPower:
                     attackPower += (int)value;
                     Debug.Log($"AttackPower Changed: {attackPower} ({value})");
                     break;
-
                 case PlayerParam.Agility:
                     speed += value;
-                    // Speedが変わったら攻撃間隔を再計算
                     currentAttackInterval = CalculateAttackInterval(speed);
                     Debug.Log($"Speed Changed: {speed} ({value}), New Interval: {currentAttackInterval:F2}s");
                     break;
@@ -260,65 +245,73 @@ namespace GGJ2026.InGame
             }
         }
 
+        // -----------------------------------------------------------------------
+        // メインマスク(アクティブスキル)関連
+        // -----------------------------------------------------------------------
+
+        private void OnApplyMainMask(InGameEvent.ApplyMainMaskEvent e)
+        {
+            if (e.SelectedItem != null && e.SelectedItem.ActiveSkill != null)
+            {
+                // 現在のスキルを更新
+                currentMainSkill = e.SelectedItem.ActiveSkill;
+                
+                // 静的な効果（Time, Point）のみここで適用
+                ApplyMainSkillStaticEffects(currentMainSkill);
+            }
+        }
+
         /// <summary>
-        /// メインスキル(ActiveSkill)の効果を適用
+        /// メインスキルのうち、装着時に一度だけ適用される効果 (Time, Point)
+        /// Attack, Defence は UpdateやTakeDamageで都度判定するためここでは何もしない
         /// </summary>
-        private void ApplyMainSkillEffect(ActiveSkillInstance skillInstance)
+        private void ApplyMainSkillStaticEffects(ActiveSkillInstance skillInstance)
         {
             ActiveSkillConfig config = skillInstance.Config;
-
-            // 確率判定 (0～100)
-            float randomValue = UnityEngine.Random.Range(0f, 100f);
-            if (randomValue > config.probability)
-            {
-                Debug.Log($"[MainMask] Skill {config.skillName} Failed (Chance: {config.probability}%)");
-                return;
-            }
-
             float multiplier = config.multipler;
-            Debug.Log(
-                $"[MainMask] Skill {config.skillName} Applied. Target: {config.effectTarget}, Value: {multiplier}");
+
+            Debug.Log($"[MainMask] Skill Set: {config.skillName} (Target: {config.effectTarget})");
 
             switch (config.effectTarget)
             {
                 case EffectTarget.Attack:
-                    // 攻撃力を倍率強化 (永続的に乗算する例)
-                    int oldAtk = attackPower;
-                    attackPower = Mathf.RoundToInt(attackPower * multiplier);
-                    Debug.Log($"[MainMask] Attack x{multiplier}: {oldAtk} -> {attackPower}");
+                    // ここでは何もしない（攻撃時に確率発動）
                     break;
 
                 case EffectTarget.Defence:
-                    // Defence は HP回復として扱う
-                    int healAmount = (int)multiplier;
-                    // もし倍率(1.5など)として設定されている場合はMaxHPに対する割合回復にするなど調整可能
-                    if (multiplier < 10f && multiplier > 0f)
-                    {
-                        healAmount = Mathf.RoundToInt(maxHp * multiplier);
-                    }
-
-                    Heal(healAmount);
+                    // ここでは何もしない（被ダメージ時に0.7倍）
                     break;
 
                 case EffectTarget.Time:
-                    // Time は Speed(攻撃速度)アップとして扱う
-                    float oldSpeed = speed;
-                    speed *= multiplier;
-                    currentAttackInterval = CalculateAttackInterval(speed);
-                    Debug.Log($"[MainMask] Speed x{multiplier}: {oldSpeed} -> {speed}");
+                    // ★修正: 確率で残り時間を5秒追加
+                    if (InGameManager.I != null)
+                    {
+                        float randomValue = UnityEngine.Random.Range(0f, 100f);
+                        if (randomValue <= config.probability)
+                        {
+                            InGameManager.I.CurrentTime += 5f;
+                            Debug.Log($"[MainMask] Time Extended: +5.0s (Chance: {config.probability}%)");
+                        }
+                        else
+                        {
+                            Debug.Log($"[MainMask] Time Extension Failed (Chance: {config.probability}%)");
+                        }
+                    }
                     break;
 
                 case EffectTarget.Point:
-                    // ポイント獲得
+                    // ポイント獲得（そのまま）
                     if (InGameManager.I != null)
                     {
-                        InGameManager.I.SetPointMultiplier(multiplier);
-                        Debug.Log($"[MainMask] Points Add: {multiplier}");
+                        float randomValue = UnityEngine.Random.Range(0f, 100f);
+                        if (randomValue > config.probability)
+                        {
+                            InGameManager.I.SetPointMultiplier(multiplier);
+                            Debug.Log($"[MainMask] Points Add: {multiplier}");
+                        }
                     }
-
                     break;
             }
         }
     }
-    
 }
