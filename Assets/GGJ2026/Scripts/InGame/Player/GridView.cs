@@ -1,6 +1,6 @@
 ﻿using GGJ2026.Core.Managers;
 using UnityEngine;
-using UnityEngine.EventSystems; // これが必要
+using UnityEngine.EventSystems;
 
 namespace GGJ2026.InGame
 {
@@ -36,7 +36,6 @@ namespace GGJ2026.InGame
         
         private void Start()
         {
-            // イベント購読開始
             if (InGameManager.IsValid())
             {
                 InGameManager.I.EventBus.Subscribe<InGameEvent.ApplyMainMaskEvent>(OnApplyMainMask);
@@ -87,11 +86,8 @@ namespace GGJ2026.InGame
 
                 if (Input.GetMouseButtonDown(0) && Time.time > lastPickupTime + PICKUP_COOLDOWN)
                 {
-                    // ★追加: UIの上（ボタンなど）をクリックした場合は配置処理を行わない
-                    if (!EventSystem.current.IsPointerOverGameObject())
-                    {
-                        TryPlaceItem(Input.mousePosition);
-                    }
+                    // ★修正: Update内でのUI判定は削除し、TryPlaceItem内で細かく判定します
+                    TryPlaceItem(Input.mousePosition);
                 }
             }
         }
@@ -179,9 +175,13 @@ namespace GGJ2026.InGame
         {
             if (holdingItem == null) return;
 
+            // 1. まず「グリッド内」かどうかを判定 (最優先)
             if (RectTransformUtility.RectangleContainsScreenPoint(itemContainer, screenPosition, GetCanvasCamera()))
             {
-                // --- グリッド内 ---
+                // --- グリッド内の場合 ---
+                // ここでは UI判定(IsPointerOverGameObject) は無視して配置処理を行う
+                // (グリッド自体がUIなので、チェックすると弾かれてしまうため)
+
                 Vector2 localPoint;
                 RectTransformUtility.ScreenPointToLocalPointInRectangle(
                     itemContainer, 
@@ -210,12 +210,23 @@ namespace GGJ2026.InGame
                 }
                 else
                 {
-                    Debug.Log($"[GridView] 配置失敗: Grid[{x},{y}] は埋まっているか、はみ出しています。");
+                    Debug.Log($"[GridView] 配置失敗: Grid[{x},{y}]");
+                    // 持ち上げたまま
                 }
             }
             else
             {
-                // --- グリッド外 ---
+                // --- グリッド外の場合 ---
+                
+                // ★追加: グリッドの外をクリックしたときだけ、UI（ボタンなど）の上かチェックする
+                if (EventSystem.current.IsPointerOverGameObject())
+                {
+                    // ボタンなどをクリックした場合は、「配置もドロップもしない（持ち上げたまま）」
+                    Debug.Log("UI Click detected outside grid. Action ignored.");
+                    return;
+                }
+
+                // UIの上でもない（完全な背景/空きスペース）ならドロップ処理
                 Debug.Log("グリッド範囲外をクリック -> 装備を外して配置します");
                 if (PlaceItemOutside(holdingItem))
                 {

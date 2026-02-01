@@ -319,7 +319,7 @@ namespace GGJ2026.Core.Managers
         private void OnHealImproved()
         {
             AudioManager.I.PlaySE(SEID.ButtonClick);
-            // InGameManager.I.EventBus.Publish(new ImproveEvents(PlayerParam.Heal, healLevel));
+            InGameManager.I.EventBus.Publish(new ImproveEvents(PlayerParam.Recovery, healLevel));
         }
 
         /// <summary>

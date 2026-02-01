@@ -41,7 +41,8 @@ namespace GGJ2026.InGame
     {
         Health,
         AttackPower,
-        Agility
+        Agility,
+        Recovery
     }
 
     public enum ActiveSkillParam
