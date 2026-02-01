@@ -69,8 +69,6 @@ namespace GGJ2026.InGame
                 // ★追加: 強化イベントの購読
                 InGameManager.I.EventBus.Subscribe<ImproveEvents>(OnImprove);
                 InGameManager.I.EventBus.Subscribe<AttackEvents>(CheckDamage);
-
-                InGameManager.I.EventBus.Subscribe<InGameEvent.ApplyMainMaskEvent>(e => characterSpriteAnimator.ChangeMask(e.SelectedItem.Config.itemName));
             }
 
             //Debug.Log($"Player Initialized. HP: {currentHp}, ATK: {attackPower}, SPD: {speed}, Interval: {currentAttackInterval:F2}s");

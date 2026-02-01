@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using GGJ2026.Core.Managers;
 using UnityEngine;
 
 namespace GGJ2026.InGame
@@ -26,6 +27,11 @@ namespace GGJ2026.InGame
             foreach (var set in maskSets)
                 maskDict[set.maskType] = set;
             ChangeMask(MaskType.Yellow);
+        }
+
+        private void Start()
+        {
+            InGameManager.I.EventBus.Subscribe<InGameEvent.ApplyMainMaskEvent>(e => ChangeMask(e.SelectedItem.Config.itemName));
         }
 
         void Update()
@@ -72,8 +78,8 @@ namespace GGJ2026.InGame
 
         public void ChangeMask(MaskType maskType)
         {
-            Debug.Log("Aaaa");
             if (!maskDict.TryGetValue(maskType, out var set)) return;
+            Debug.Log(maskType);
             currentMask = set;
             ResetAnimation();
         }

@@ -80,24 +80,24 @@ namespace GGJ2026.Core.Managers
         {
             base.Init();
             ShowGrid();
-            
+
             // リスナーを削除してから追加（重複防止）
             openImproveMenuButton.onClick.RemoveAllListeners();
             openImproveMenuButton.onClick.AddListener(() => ShowImproveMenu());
-            
+
             closeImproveMenuButton.onClick.RemoveAllListeners();
             closeImproveMenuButton.onClick.AddListener(() => ShowGrid());
 
             // 強化ボタンのリスナー設定
             hpImproveButton.onClick.RemoveAllListeners();
             hpImproveButton.onClick.AddListener(() => TryImprove(ref hpLevel, hpImproveLevelText, OnHpImproved));
-            
+
             attackImproveButton.onClick.RemoveAllListeners();
             attackImproveButton.onClick.AddListener(() => TryImprove(ref attackLevel, attackImproveLevelText, OnAttackImproved));
-            
+
             speedImproveButton.onClick.RemoveAllListeners();
             speedImproveButton.onClick.AddListener(() => TryImprove(ref speedLevel, speedImproveLevelText, OnSpeedImproved));
-            
+
             healButton.onClick.RemoveAllListeners();
             healButton.onClick.AddListener(() => TryHealImprove());
 
@@ -107,7 +107,7 @@ namespace GGJ2026.Core.Managers
             // メインマスク適用ボタンのリスナー設定
             mainMaskApplyButton.onClick.RemoveAllListeners();
             mainMaskApplyButton.onClick.AddListener(() => OnMainMaskApply());
-            
+
             Debug.Log($"[UiManager] mainMaskApplyButton listener added. Button: {mainMaskApplyButton != null}");
 
             // リワードボタンのリスナー設定
@@ -405,25 +405,16 @@ namespace GGJ2026.Core.Managers
 
         private void OnMaskDescriptionClose()
         {
-            Debug.Log("[UiManager] OnMaskDescriptionClose called");
             OpenMaskDescriptionPopup(false);
         }
 
         private void OnMainMaskApply()
         {
-            Debug.Log("[UiManager] OnMainMaskApply called!");
-            Debug.Log($"[UiManager] Item: {currentoOpenMaskItem?.Config.itemName}, Object: {currentoOpenMaskObject?.name}");
-            
             if (currentoOpenMaskItem != null)
-            {
                 InGameManager.I.EventBus.Publish(new ApplyMainMaskEvent(currentoOpenMaskItem, currentoOpenMaskObject));
-                Debug.Log("[UiManager] ApplyMainMaskEvent published");
-            }
             else
-            {
                 Debug.LogWarning("[UiManager] currentoOpenMaskItem is null!");
-            }
-            
+
             OpenMaskDescriptionPopup(false);
         }
 
