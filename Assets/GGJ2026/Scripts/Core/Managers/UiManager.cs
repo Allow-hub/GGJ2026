@@ -376,10 +376,10 @@ namespace GGJ2026.Core.Managers
         private void SetRewardView(int index, ItemInstance rewardItem)
         {
             rewardText[index].text =
-                $"<color=\"red\">ActiveSkill\n</color>" +
+                $"<color=#ff4500>ActiveSkill\n</color>" +
                 $"{rewardItem.Config.activeSkill.description}\n" +
                 $"\n" +
-                $"<color=#005500>PassiveSkill\n</color>" +
+                $"<color=#7cfc00>PassiveSkill\n</color>" +
                 $"{rewardItem.PassiveSkill.GetDescription()}\n";
 
             rewardImage[index].sprite = rewardItem.Config.itemSprite;
@@ -396,7 +396,7 @@ namespace GGJ2026.Core.Managers
             {
                 maskDescriptionText.text =
                 $"ActiveSkill {item.Config.activeSkill.skillName}\n" +
-                $"{item.Config.activeSkill.description}\n" +
+                $"{item.Config.activeSkill.description}" +
                 $"PassiveSkill {item.PassiveSkill.Config._skillName}\n" +
                 $"{item.PassiveSkill.GetDescription()}\n";
                 currentoOpenMaskItem = item;
