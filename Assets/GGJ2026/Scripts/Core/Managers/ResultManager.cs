@@ -1,5 +1,6 @@
 using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace GGJ2026.Core.Managers
 {
@@ -11,6 +12,7 @@ namespace GGJ2026.Core.Managers
         [SerializeField] private TextMeshProUGUI scoreText;
         [SerializeField] private TextMeshProUGUI timeText;
         [SerializeField] private TextMeshProUGUI stageText;
+        [SerializeField] private Button continueButton;
 
 
         private void Awake()
@@ -18,6 +20,11 @@ namespace GGJ2026.Core.Managers
             scoreText.text = $"{PointManager.I.Points}";
             timeText.text = GameManager.I.AliveTimer.ToString("F0");
             stageText.text = $"{GameManager.I.ResultFloor}";
+        }
+
+        private void Start()
+        {
+            continueButton.onClick.AddListener(() => GameManager.I.ChangeTitleState());
         }
     }
 }
