@@ -18,11 +18,35 @@ namespace GGJ2026.InGame.Enemy
         [SerializeField] private int baseHP = 100;
         [SerializeField] private int baseATK = 10;
         [SerializeField] private int baseAGL = 5;
+        
+        [Header("HP上昇率設定")]
+        [SerializeField, Tooltip("1フロアごとの上昇率 (例: 0.05 = 5%)")] 
+        private float hpGrowthPerFloor = 0.05f;
+        [SerializeField, Tooltip("10フロアごとのボーナス上昇率 (例: 0.5 = 50%)")] 
+        private float hpGrowthPer10Floors = 0.5f;
+
+        [Header("ATK上昇率設定")]
+        [SerializeField, Tooltip("1フロアごとの上昇率")] 
+        private float atkGrowthPerFloor = 0.05f;
+        [SerializeField, Tooltip("10フロアごとのボーナス上昇率")] 
+        private float atkGrowthPer10Floors = 0.3f;
+
+        [Header("AGL上昇率設定")]
+        [SerializeField, Tooltip("1フロアごとの上昇率")] 
+        private float aglGrowthPerFloor = 0.02f;
+        [SerializeField, Tooltip("10フロアごとのボーナス上昇率")] 
+        private float aglGrowthPer10Floors = 0.1f;
 
         [SerializeField] private float multiplierPerFloor = 0.02f;
 
         [Header("生成設定")]
         [SerializeField] private Transform spawnPoint;
+        private enum StatType
+        {
+            HP,
+            ATK,
+            AGL
+        }
 
         /// <summary>
         /// 現存している敵のリスト
@@ -73,9 +97,9 @@ namespace GGJ2026.InGame.Enemy
                 return null;
             }
 
-            int hp = CalculateStat(baseHP, floor);
-            int atk = CalculateStat(baseATK, floor);
-            int agl = CalculateStat(baseAGL, floor);
+            int hp = CalculateStat(StatType.HP, baseHP, floor);
+            int atk = CalculateStat(StatType.ATK, baseATK, floor);
+            int agl = CalculateStat(StatType.AGL, baseAGL, floor);
 
             enemy.Init(hp, atk, agl, floor);
 
@@ -108,9 +132,9 @@ namespace GGJ2026.InGame.Enemy
                 return null;
             }
 
-            int hp = CalculateStat(baseHP, floor);
-            int atk = CalculateStat(baseATK, floor);
-            int agl = CalculateStat(baseAGL, floor);
+            int hp = CalculateStat(StatType.HP, baseHP, floor);
+            int atk = CalculateStat(StatType.ATK, baseATK, floor);
+            int agl = CalculateStat(StatType.AGL, baseAGL, floor);
 
             enemy.Init(hp, atk, agl, floor);
 
@@ -149,12 +173,45 @@ namespace GGJ2026.InGame.Enemy
         }
 
         /// <summary>
-        /// 階層に応じたステータス計算
+        /// 階層とステータスタイプに応じた計算
+        /// 式: Base * (1 + (階数 * 小増加率) + (階数/10 * 大増加率))
         /// </summary>
-        private int CalculateStat(int baseValue, int floor)
+        private int CalculateStat(StatType type, int baseValue, int floor)
         {
-            float multiplier = 1.0f + (floor - 1) * multiplierPerFloor;
-            return Mathf.RoundToInt(baseValue * multiplier);
+            // 1階層目を基準（0）とするため -1 する
+            int floorIndex = Mathf.Max(0, floor - 1);
+
+            float growthPerFloor = 0f;
+            float growthPer10Floors = 0f;
+
+            // タイプごとに倍率を設定
+            switch (type)
+            {
+                case StatType.HP:
+                    growthPerFloor = hpGrowthPerFloor;
+                    growthPer10Floors = hpGrowthPer10Floors;
+                    break;
+                case StatType.ATK:
+                    growthPerFloor = atkGrowthPerFloor;
+                    growthPer10Floors = atkGrowthPer10Floors;
+                    break;
+                case StatType.AGL:
+                    growthPerFloor = aglGrowthPerFloor;
+                    growthPer10Floors = aglGrowthPer10Floors;
+                    break;
+            }
+
+            // 1フロアごとの微増分 (線形増加)
+            float smallMultiplier = floorIndex * growthPerFloor;
+
+            // 10フロアごとの大幅増分 (10階層ごとにガツンと上がる)
+            // 整数除算 int / int で小数点以下切り捨てを利用 (例: 19/10 = 1, 20/10 = 2)
+            float largeMultiplier = (floorIndex / 10) * growthPer10Floors;
+
+            // 基本倍率1.0に加算
+            float totalMultiplier = 1.0f + smallMultiplier + largeMultiplier;
+
+            return Mathf.RoundToInt(baseValue * totalMultiplier);
         }
     }
 }

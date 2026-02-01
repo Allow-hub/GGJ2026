@@ -1663,9 +1663,15 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   enemyPrefab: {fileID: 4064560364635670763, guid: c7b9fde98fa1e1a4695338a996af4935,
     type: 3}
-  baseHP: 100
+  baseHP: 10
   baseATK: 10
   baseAGL: 5
+  hpGrowthPerFloor: 2
+  hpGrowthPer10Floors: 10
+  atkGrowthPerFloor: 0.05
+  atkGrowthPer10Floors: 0.3
+  aglGrowthPerFloor: 0.02
+  aglGrowthPer10Floors: 0.1
   multiplierPerFloor: 0.02
   spawnPoint: {fileID: 3091871277240768407}
 --- !u!114 &454401809026022901
@@ -1681,15 +1687,15 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   allItemConfig:
-  - {fileID: 11400000, guid: 0eb1a51cdda341144ae897670fe8dcdd, type: 2}
   - {fileID: 11400000, guid: d705ecc25c685634ca03c807cbf189ea, type: 2}
+  - {fileID: 11400000, guid: 0eb1a51cdda341144ae897670fe8dcdd, type: 2}
+  - {fileID: 11400000, guid: d561446b0f0174d4f980709e871bbac8, type: 2}
+  - {fileID: 11400000, guid: a82c1ae2f6b9af2468522aed1c5c89ce, type: 2}
+  - {fileID: 11400000, guid: 13979f3ee3a85c94097e45f77886fd10, type: 2}
   allPassiveSkillPool:
   - {fileID: 11400000, guid: 8ffa5cb57b1c94343bf7777026b4b9a3, type: 2}
   - {fileID: 11400000, guid: 38bf1b4a662340e4bbf10e3cbea9c7be, type: 2}
-  itemContainer: {fileID: 839964001688801996}
   gridView: {fileID: 5924401519896384223}
-  minSpawnRadius: 600
-  maxSpawnRadius: 800
 --- !u!1 &2509731528350928788
 GameObject:
   m_ObjectHideFlags: 0
@@ -3516,6 +3522,8 @@ MonoBehaviour:
   width: 3
   height: 3
   cellSize: 200
+  backgroundWidth: 1085
+  backgroundHeight: 950
   gridOrigin: {fileID: 3375084421267346114}
   itemContainer: {fileID: 839964001688801996}
 --- !u!225 &303289645402244648
@@ -5753,8 +5761,10 @@ MonoBehaviour:
   width: 3
   height: 3
   cellSize: 100
-  gridOrigin: {fileID: 0}
-  itemContainer: {fileID: 0}
+  backgroundWidth: 1085
+  backgroundHeight: 950
+  gridOrigin: {fileID: 3375084421267346114}
+  itemContainer: {fileID: 839964001688801996}
 --- !u!1 &8340108719469403703
 GameObject:
   m_ObjectHideFlags: 0
@@ -6953,6 +6963,16 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 2657984286142541983}
     m_Modifications:
+    - target: {fileID: -111794648916539931, guid: 309cf0b011e2e1a4b81efcb3871d2413,
+        type: 3}
+      propertyPath: currentHp
+      value: 100
+      objectReference: {fileID: 0}
+    - target: {fileID: -111794648916539931, guid: 309cf0b011e2e1a4b81efcb3871d2413,
+        type: 3}
+      propertyPath: attackPower
+      value: 10
+      objectReference: {fileID: 0}
     - target: {fileID: 1322241082599410482, guid: 309cf0b011e2e1a4b81efcb3871d2413,
         type: 3}
       propertyPath: m_PresetInfoIsWorld
