@@ -529,9 +529,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   audioData: {fileID: 11400000, guid: 6583d24cce062184fb8504d993734a66, type: 2}
-  masterVolume: 1
-  bgmVolume: 1
-  seVolume: 1
+  masterVolume: 0.21
+  bgmVolume: 0.42
+  seVolume: 0.62
   seSourceCount: 10
 --- !u!4 &1980736853
 Transform:
