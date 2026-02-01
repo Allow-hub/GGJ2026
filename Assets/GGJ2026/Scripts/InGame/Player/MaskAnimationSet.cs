@@ -28,6 +28,7 @@ namespace GGJ2026.InGame
         public Sprite[] idleSprites;   // 3枚固定
         public Sprite[] attackSprites; // 3枚固定
 
-        public float frameInterval = 0.15f;
+        public float idleFrameInterval = 0.1f;    // Idleのフレーム間隔
+        public float attackFrameInterval = 0.08f; // 攻撃のフレーム間隔    }
     }
 }

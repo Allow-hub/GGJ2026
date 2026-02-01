@@ -44,6 +44,12 @@ namespace GGJ2026.Core.Managers
         [SerializeField] private int healBasePointCost = 50;   // 回復は高め
         [SerializeField] private float healCostMultiplier = 2.0f;
 
+        [Header("タイマー関連")]
+        [SerializeField] private Slider timerSlider;//タイマースライダー
+        [SerializeField] private Image timerFillImage;//スライダーの塗りつぶし画像（オプション）
+        [SerializeField] private Color timerStartColor = Color.green;//開始時の色
+        [SerializeField] private Color timerEndColor = Color.red;//終了時の色
+
         [SerializeField] private CanvasGroup maskDescriptionPopupCanvasGroup;//マスク説明ポップアップ
         [SerializeField] private TextMeshProUGUI maskDescriptionText;//マスク説明テキスト
         [SerializeField] private Button maskDescriptionCloseButton;//マスク説明ポップアップ閉じるボタン
@@ -95,9 +101,12 @@ namespace GGJ2026.Core.Managers
                 rewardButtons[i].onClick.AddListener(() => OnRewardSelected(index));
             }
 
+            // タイマースライダーの初期化
+            InitializeTimerSlider();
+
             Set(rewardCanvasGroup, false);
             InGameManager.I.EventBus.Subscribe<OnRewardStartEvent>(e => ShowReward(e));
-
+            ptText.text = lastPt.ToString();
             // 初期テキスト更新
             UpdateLevelText();
         }
@@ -107,7 +116,9 @@ namespace GGJ2026.Core.Managers
             // ボタンの有効/無効を更新
             UpdateButtonStates();
             UpdateStatusTexts();
-            if(PointManager.I.Points != lastPt)
+            UpdateTimerSlider();
+
+            if (PointManager.I.Points != lastPt)
             {
                 lastPt = PointManager.I.Points;
                 ptText.text = lastPt.ToString();
@@ -117,6 +128,52 @@ namespace GGJ2026.Core.Managers
                 lastFloor = InGameManager.I.CurrentFloor;
                 floorText.text = $"{lastFloor}";
             }
+        }
+
+        /// <summary>
+        /// タイマースライダーの初期化
+        /// </summary>
+        private void InitializeTimerSlider()
+        {
+            if (timerSlider != null)
+            {
+                timerSlider.minValue = 0f;
+                timerSlider.maxValue = 1f;
+                timerSlider.value = 0f; // 初期値を0に（時間が経つと増える）
+                timerSlider.interactable = false; // スライダーは操作不可
+
+                // Fill Imageがある場合は色を設定
+                if (timerFillImage == null && timerSlider.fillRect != null)
+                {
+                    timerFillImage = timerSlider.fillRect.GetComponent<Image>();
+                }
+
+                if (timerFillImage != null)
+                {
+                    timerFillImage.color = timerStartColor;
+                }
+            }
+        }
+
+        /// <summary>
+        /// タイマースライダーを更新
+        /// </summary>
+        private void UpdateTimerSlider()
+        {
+            if (timerSlider == null) return;
+
+            float currentTime = InGameManager.I.CurrentTime;
+            float gameDuration = InGameManager.I.GameDuration;
+
+            // 経過時間の割合を計算（0.0 = 開始, 1.0 = 終了）
+            float timeRatio = Mathf.Clamp01(currentTime / gameDuration);
+
+            // スライダーの値を更新（時間とともに増加）
+            timerSlider.value = timeRatio;
+
+            // 色のグラデーションを更新（緑→赤へ）
+            if (timerFillImage != null)
+                timerFillImage.color = Color.Lerp(timerStartColor, timerEndColor, timeRatio);
         }
 
         /// <summary>
@@ -307,7 +364,7 @@ namespace GGJ2026.Core.Managers
         /// </summary>
         /// <param name="open"></param>
         /// <param name="item"></param>
-        public void OpenMaskDescriptionPopup(bool open, ItemInstance item = null,GameObject obj = null)
+        public void OpenMaskDescriptionPopup(bool open, ItemInstance item = null, GameObject obj = null)
         {
             if (open)
             {
@@ -328,7 +385,7 @@ namespace GGJ2026.Core.Managers
             Set(maskDescriptionPopupCanvasGroup, open);
         }
 
-        
+
         private void ApplyMainMask()
         {
             InGameManager.I.EventBus.Publish(new ApplyMainMaskEvent(currentoOpenMaskItem, currentoOpenMaskObject));

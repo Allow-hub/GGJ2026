@@ -33,11 +33,33 @@ namespace GGJ2026.InGame
             if (currentMask == null) return;
 
             timer += Time.deltaTime;
-            if (timer >= currentMask.frameInterval)
+            
+            // 現在の状態に応じたフレーム間隔を取得
+            float currentFrameInterval = currentState == CharacterAnimState.Idle
+                ? currentMask.idleFrameInterval
+                : currentMask.attackFrameInterval;
+
+            if (timer >= currentFrameInterval)
             {
                 timer = 0f;
-                frameIndex = (frameIndex + 1) % 3;
-                spriteRenderer.sprite = GetCurrentSprites()[frameIndex];
+                
+                var sprites = GetCurrentSprites();
+                frameIndex++;
+
+                // 攻撃アニメーションの終了チェック
+                if (currentState == CharacterAnimState.Attack && frameIndex >= sprites.Length)
+                {
+                    PlayIdle();
+                    return;
+                }
+
+                // Idleアニメーションはループ
+                if (currentState == CharacterAnimState.Idle)
+                {
+                    frameIndex %= sprites.Length;
+                }
+
+                spriteRenderer.sprite = sprites[frameIndex];
             }
         }
 

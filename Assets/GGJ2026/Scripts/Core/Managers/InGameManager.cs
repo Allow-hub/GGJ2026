@@ -14,6 +14,7 @@ namespace GGJ2026.Core.Managers
     public class InGameManager : Singleton<InGameManager>
     {
         [SerializeField] private float gameDuration = 180f;
+        public float GameDuration => gameDuration;
         [SerializeField] private TextMeshProUGUI countdownText; //カウントダウンテキスト
         [SerializeField] private CanvasGroup canvasGroup;
         [SerializeField] private PlayerController playerController;
@@ -53,12 +54,10 @@ namespace GGJ2026.Core.Managers
             aliveTimer = 0;
             EventBus.Subscribe<InGameEvent.OnRewardSelectedEvent>(OnRewardSelected);
             ChangeState(InGameState.Start);
-            
+
             var image = GetComponent<Image>();
             if (image != null)
-            {
                 image.alphaHitTestMinimumThreshold = 0.1f;
-            }
         }
 
         private void Update()
@@ -127,7 +126,7 @@ namespace GGJ2026.Core.Managers
         private void OnBattleStart()
         {
         }
-        
+
         private void OnRewardSelected(InGameEvent.OnRewardSelectedEvent e)
         {
             // 選択されたアイテムを画面に出現させる

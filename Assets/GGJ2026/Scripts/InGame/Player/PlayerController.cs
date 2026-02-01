@@ -30,6 +30,7 @@ namespace GGJ2026.InGame
 
         [Header("Attack Settings")]
         [SerializeField] private float baseAttackInterval = 2.0f; 
+        [SerializeField] private CharacterSpriteAnimator characterSpriteAnimator;
         private float attackTimer = 0f;
         private float currentAttackInterval;
 
@@ -154,6 +155,7 @@ namespace GGJ2026.InGame
         {
             if (InGameManager.IsValid() && InGameManager.I.EventBus != null)
             {
+                characterSpriteAnimator.PlayAttack();
                 // 必要であればここでEventBusにPublish
                 InGameManager.I.EventBus.Publish(new AttackEvents(this, EnemyFactory.I.CurrentEnemies[0]));
             }
@@ -200,7 +202,7 @@ namespace GGJ2026.InGame
             Debug.Log("Player is Dead.");
             if (InGameManager.IsValid())
             {
-                //InGameManager.I.EndGame(); 
+                InGameManager.I.EndGame(); 
             }
         }
         
