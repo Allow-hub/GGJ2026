@@ -1,6 +1,6 @@
 ﻿using GGJ2026.Core.Managers;
 using UnityEngine;
-using UnityEngine.EventSystems;
+using UnityEngine.EventSystems; // これが必要
 
 namespace GGJ2026.InGame
 {
@@ -45,14 +45,12 @@ namespace GGJ2026.InGame
 
         private void OnDestroy()
         {
-            // イベント購読解除
             if (InGameManager.IsValid())
             {
                 InGameManager.I.EventBus.Unsubscribe<InGameEvent.ApplyMainMaskEvent>(OnApplyMainMask);
             }
         }
 
-        // ★追加: メインマスク適用イベント受信時の処理
         private void OnApplyMainMask(InGameEvent.ApplyMainMaskEvent e)
         {
             GameObject targetObj = e.SelectedObject;
@@ -62,30 +60,22 @@ namespace GGJ2026.InGame
                 DraggableItem item = targetObj.GetComponent<DraggableItem>();
                 if (item != null)
                 {
-                    // 1. グリッドデータから削除 (もしグリッド上に配置されていたら)
                     if (item.CurrentGridX != -1 && item.CurrentGridY != -1)
                     {
                         gridSystem.RemoveItem(item.Config, item.CurrentGridX, item.CurrentGridY);
                     }
 
-                    // 2. パッシブ効果の解除 (装備されていたらステータスを減算して戻す)
-                    // ※ApplyMainMaskの効果自体でステータスが上がるとしても、
-                    //   「装備品としての効果」は一度外れるはずなので解除を送る
                     if (item.Instance.PassiveSkill != null)
                     {
                         InGameManager.I.EventBus.Publish(new InGameEvent.PassiveEffectEvent(item.Instance.PassiveSkill, false));
                     }
 
-                    // 3. 持ち上げ中のアイテムだった場合の参照解除
                     if (holdingItem == item)
                     {
                         holdingItem = null;
                     }
                 }
-
-                // 4. オブジェクトの破壊
                 Destroy(targetObj);
-                Debug.Log($"[GridView] Item destroyed via ApplyMainMask: {e.SelectedItem.Config.itemName}");
             }
         }
 
@@ -97,7 +87,11 @@ namespace GGJ2026.InGame
 
                 if (Input.GetMouseButtonDown(0) && Time.time > lastPickupTime + PICKUP_COOLDOWN)
                 {
-                    TryPlaceItem(Input.mousePosition);
+                    // ★追加: UIの上（ボタンなど）をクリックした場合は配置処理を行わない
+                    if (!EventSystem.current.IsPointerOverGameObject())
+                    {
+                        TryPlaceItem(Input.mousePosition);
+                    }
                 }
             }
         }
@@ -164,6 +158,7 @@ namespace GGJ2026.InGame
                 UiManager.I.OpenMaskDescriptionPopup(true, item.Instance, item.gameObject);
             }
 
+            // グリッド内にある場合のみ、削除処理とパラメータ減算を行う
             if (item.CurrentGridX != -1 && item.CurrentGridY != -1)
             {
                 gridSystem.RemoveItem(item.Config, item.CurrentGridX, item.CurrentGridY);
