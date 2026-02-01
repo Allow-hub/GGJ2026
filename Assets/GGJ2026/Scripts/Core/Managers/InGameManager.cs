@@ -141,9 +141,9 @@ namespace GGJ2026.Core.Managers
             float floorMultiplier = 1f + (currentFloor - 1) * floorBonusRate;
             var pt = basePt * pointMultiplier * floorMultiplier;
             PointManager.I.AddPoints((int)pt);
-            var item_1 = ItemFactory.I.ChooseItem();
-            var item_2 = ItemFactory.I.ChooseItem();
-            var item_3 = ItemFactory.I.ChooseItem();
+            var item_1 = ItemFactory.I.ChooseItem(currentFloor);
+            var item_2 = ItemFactory.I.ChooseItem(currentFloor);
+            var item_3 = ItemFactory.I.ChooseItem(currentFloor);
 
             // 報酬UI表示 + 10秒カウント
             eventBus.Publish(new InGameEvent.OnRewardStartEvent(item_1, item_2, item_3));
