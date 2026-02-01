@@ -36,7 +36,11 @@ namespace GGJ2026.Core.Managers
         public InGameState CurrentState { get; private set; }
 
         [SerializeField, ReadOnly] private float currentTime;
-        public float CurrentTime => currentTime;
+        public float CurrentTime
+        {
+            get => currentTime;
+            set => currentTime = value;
+        }
 
         private float aliveTimer = 0;
         [SerializeField, ReadOnly] private int currentFloor;
