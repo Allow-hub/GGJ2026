@@ -55,7 +55,11 @@ namespace GGJ2026.InGame.Enemy
 
             Debug.Log($"Enemy initialized on Floor {floor} - HP: {maxHP}, ATK: {atk}, AGL: {agl}, AttackInterval: {currentAttackInterval:F2}s");
         }
-
+        private void OnDestroy()
+        {
+            if (!InGameManager.IsValid()) return;
+            InGameManager.I.EventBus.Unsubscribe<AttackEvents>(e => CheckDamage(e));
+        }
         private void Update()
         {
             if (!IsAlive)

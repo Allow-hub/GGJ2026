@@ -50,6 +50,12 @@ namespace GGJ2026.InGame
         {
             InGameManager.I.EventBus.Subscribe<InGameEvent.ApplyMainMaskEvent>(e => ChangeMask(e));
         }
+        private void OnDestroy()
+        {
+            if (!InGameManager.IsValid()) return;
+            InGameManager.I.EventBus.Unsubscribe<InGameEvent.ApplyMainMaskEvent>(e => ChangeMask(e));
+        }
+
 
         private void ChangeMask(InGameEvent.ApplyMainMaskEvent e)
         {
