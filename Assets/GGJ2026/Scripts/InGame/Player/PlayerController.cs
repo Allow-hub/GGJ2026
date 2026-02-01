@@ -158,6 +158,7 @@ namespace GGJ2026.InGame
             if (InGameManager.IsValid() && InGameManager.I.EventBus != null)
             {
                 characterSpriteAnimator.PlayAttack();
+                AudioManager.I.PlaySE(Core.Audio.SEID.Attack);
                 // 必要であればここでEventBusにPublish
                 InGameManager.I.EventBus.Publish(new AttackEvents(this, EnemyFactory.I.CurrentEnemies[0]));
             }
