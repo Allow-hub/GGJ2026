@@ -46,12 +46,25 @@ namespace GGJ2026.InGame
             public readonly ItemInstance SelectedItem;
             public readonly GameObject SelectedObject;
 
-            public ApplyMainMaskEvent(ItemInstance selectedItem,GameObject selectedObject)
+            public ApplyMainMaskEvent(ItemInstance selectedItem, GameObject selectedObject)
             {
                 SelectedItem = selectedItem;
                 SelectedObject = selectedObject;
             }
         }
+
+        public class SellMaskEvent
+        {
+            public readonly ItemInstance SellItem;
+            public readonly GameObject SellObject;
+
+            public SellMaskEvent(ItemInstance itemInstance, GameObject selectedObject)
+            {
+                SellItem = itemInstance;
+                SellObject = selectedObject;
+            }
+        }
+        
         /// <summary>
         /// パッシブスキル適用/解除イベント
         /// </summary>

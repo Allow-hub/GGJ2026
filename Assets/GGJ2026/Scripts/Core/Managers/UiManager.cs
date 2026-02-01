@@ -54,6 +54,7 @@ namespace GGJ2026.Core.Managers
         [SerializeField] private TextMeshProUGUI maskDescriptionText;//マスク説明テキスト
         [SerializeField] private Button maskDescriptionCloseButton;//マスク説明ポップアップ閉じるボタン
         [SerializeField] private Button mainMaskApplyButton;//メインマスクに適用
+        [SerializeField] private Button sellButton;//売却
         private ItemInstance currentoOpenMaskItem;
         private GameObject currentoOpenMaskObject;
         [SerializeField] private TextMeshProUGUI floorText;//現在のフロアテキスト
@@ -104,6 +105,8 @@ namespace GGJ2026.Core.Managers
             maskDescriptionCloseButton.onClick.RemoveAllListeners();
             maskDescriptionCloseButton.onClick.AddListener(() => OnMaskDescriptionClose());
 
+            sellButton.onClick.RemoveAllListeners();
+            sellButton.onClick.AddListener(() => OnSellMask());
             // メインマスク適用ボタンのリスナー設定
             mainMaskApplyButton.onClick.RemoveAllListeners();
             mainMaskApplyButton.onClick.AddListener(() => OnMainMaskApply());
@@ -421,6 +424,16 @@ namespace GGJ2026.Core.Managers
                 Debug.LogWarning("[UiManager] currentoOpenMaskItem is null!");
 
             OpenMaskDescriptionPopup(false);
+        }
+
+
+        private void OnSellMask()
+        {
+            if (currentoOpenMaskItem == null) return;
+            PointManager.I.AddPoints(currentoOpenMaskItem.Config.price);
+            OnMaskDescriptionClose();
+            //Sellイベントの送信
+            InGameManager.I.EventBus.Publish(new SellMaskEvent(currentoOpenMaskItem, currentoOpenMaskObject));
         }
 
         /// <summary>
