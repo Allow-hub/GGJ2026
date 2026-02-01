@@ -152,7 +152,7 @@ namespace GGJ2026.Core.Managers
             var pt = basePt * pointMultiplier * floorMultiplier;
             PointManager.I.AddPoints((int)pt);
 
-            if (CurrentFloor % 10 == 1)
+            if (CurrentFloor % 5 == 1)
             {
                 var item_1 = ItemFactory.I.ChooseItem(currentFloor);
                 var item_2 = ItemFactory.I.ChooseItem(currentFloor);

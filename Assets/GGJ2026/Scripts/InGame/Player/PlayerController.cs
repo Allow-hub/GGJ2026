@@ -116,6 +116,10 @@ namespace GGJ2026.InGame
                     currentAttackInterval = CalculateAttackInterval(speed);
                     Debug.Log($"[Improve] Speed Up! {speed} (+{speedGrowthPerLevel})");
                     break;
+                case PlayerParam.Recovery:
+                    currentHp = maxHp;
+                    Debug.Log($"[Improve] Full Recovery! HP: {currentHp}/{maxHp}");
+                    break;
             }
         }
 
