@@ -6119,7 +6119,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 2100000, guid: 5e79085f50f4c294994ae98add01b493, type: 2}
-  m_Color: {r: 1, g: 0.99607843, b: 0.29803923, a: 1}
+  m_Color: {r: 0.8113208, g: 0.8113208, b: 0.8113208, a: 1}
   m_RaycastTarget: 0
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -6156,16 +6156,16 @@ MonoBehaviour:
     color: {r: 0.2216981, g: 0.78533226, b: 1, a: 1}
   - maskType: 1
     image: {fileID: 21300000, guid: be75e82ee07b28642a8d6b20cfa40fd1, type: 3}
-    color: {r: 1, g: 0.3066038, b: 0.7556969, a: 1}
+    color: {r: 0.9019608, g: 0.7607843, b: 1, a: 1}
   - maskType: 2
     image: {fileID: 21300000, guid: b2d07e4ca642ca849ace3846ddcb5100, type: 3}
-    color: {r: 1, g: 0.24056602, b: 0.24056602, a: 1}
+    color: {r: 1, g: 0.627451, b: 0.6392157, a: 1}
   - maskType: 4
     image: {fileID: 21300000, guid: f653e9d3aa7e91e408323cc8bde1fe80, type: 3}
-    color: {r: 1, g: 1, b: 1, a: 1}
+    color: {r: 0.8117647, g: 0.8117647, b: 0.8117647, a: 1}
   - maskType: 0
     image: {fileID: 21300000, guid: 8f0a26e688eed4c44a4f6cf68dc2175e, type: 3}
-    color: {r: 1, g: 0.99699616, b: 0.2971698, a: 1}
+    color: {r: 0.91764706, g: 0.91764706, b: 0.2971698, a: 1}
 --- !u!1 &7552046514766314817
 GameObject:
   m_ObjectHideFlags: 0
