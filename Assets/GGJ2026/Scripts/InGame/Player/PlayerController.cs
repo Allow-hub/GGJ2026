@@ -67,9 +67,10 @@ namespace GGJ2026.InGame
                 
                 // ★追加: 強化イベントの購読
                 InGameManager.I.EventBus.Subscribe<ImproveEvents>(OnImprove);
+                InGameManager.I.EventBus.Subscribe<AttackEvents>(CheckDamage);
             }
 
-            Debug.Log($"Player Initialized. HP: {currentHp}, ATK: {attackPower}, SPD: {speed}, Interval: {currentAttackInterval:F2}s");
+            //Debug.Log($"Player Initialized. HP: {currentHp}, ATK: {attackPower}, SPD: {speed}, Interval: {currentAttackInterval:F2}s");
         }
         
         private void OnDestroy()
@@ -78,7 +79,20 @@ namespace GGJ2026.InGame
             {
                 InGameManager.I.EventBus.Unsubscribe<InGameEvent.PassiveEffectEvent>(OnPassiveEffect);
                 InGameManager.I.EventBus.Unsubscribe<ImproveEvents>(OnImprove);
+                InGameManager.I.EventBus.Unsubscribe<AttackEvents>(CheckDamage);
             }
+        }
+        
+        private void CheckDamage(AttackEvents attackEvents)
+        {
+            // ターゲットが自分(Player)でなければ無視
+            if (!ReferenceEquals(attackEvents.Target, this)) return;
+            
+            // 攻撃者が自分なら無視（念のため）
+            if (ReferenceEquals(attackEvents.Attacker, this)) return;
+
+            // ダメージを受ける
+            TakeDamage(attackEvents.Attacker.Damage);
         }
         
         private void OnImprove(ImproveEvents e)
@@ -144,7 +158,7 @@ namespace GGJ2026.InGame
                 InGameManager.I.EventBus.Publish(new AttackEvents(this, EnemyFactory.I.CurrentEnemies[0]));
             }
 
-            Debug.Log($"Player attacks! (Damage: {attackPower})");
+            //Debug.Log($"Player attacks! (Damage: {attackPower})");
         }
 
         // IAttackable 実装
@@ -163,7 +177,7 @@ namespace GGJ2026.InGame
             currentHp -= damage;
             if (currentHp < 0) currentHp = 0;
 
-            Debug.Log($"Player Took Damage: {damage}, CurrentHP: {currentHp}");
+            //Debug.Log($"Player Took Damage: {damage}, CurrentHP: {currentHp}");
 
             if (currentHp == 0)
             {
@@ -186,8 +200,7 @@ namespace GGJ2026.InGame
             Debug.Log("Player is Dead.");
             if (InGameManager.IsValid())
             {
-                // ゲームオーバー通知などをここで行う
-                // InGameManager.I.OnPlayerDead(); 
+                //InGameManager.I.EndGame(); 
             }
         }
         
@@ -236,31 +249,6 @@ namespace GGJ2026.InGame
                     Debug.Log($"Speed Changed: {speed} ({value}), New Interval: {currentAttackInterval:F2}s");
                     break;
             }
-        }
-        
-        private void OnGUI()
-        {
-            float width = 250f;
-            float height = 250f;
-            float margin = 10f;
-
-            // 画面の高さからウィンドウの高さとマージンを引くことで「左下」のY座標を算出
-            float y = Screen.height - height - margin;
-
-            // 左下の座標を指定
-            GUILayout.BeginArea(new Rect(margin, y, width, height), "Debug: Player Status", GUI.skin.window);
-
-            GUILayout.Label($"HP: {currentHp} / {maxHp}");
-            GUILayout.Label($"Speed: {Speed}");
-            GUILayout.Label($"Interval: {currentAttackInterval:F2}s");
-            GUILayout.Label($"Attack: {AttackPower}");
-
-            GUILayout.Space(10);
-
-            if (GUILayout.Button("Damage 10")) TakeDamage(10);
-            if (GUILayout.Button("Heal 10")) Heal(10);
-
-            GUILayout.EndArea();
         }
     }
 }

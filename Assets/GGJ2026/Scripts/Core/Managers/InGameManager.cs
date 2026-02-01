@@ -4,6 +4,7 @@ using GGJ2026.InGame.Enemy;
 using TechC.VBattle.Core;
 using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace GGJ2026.Core.Managers
 {
@@ -50,7 +51,14 @@ namespace GGJ2026.Core.Managers
             currentTime = gameDuration;
             currentFloor = 1;
             aliveTimer = 0;
+            EventBus.Subscribe<InGameEvent.OnRewardSelectedEvent>(OnRewardSelected);
             ChangeState(InGameState.Start);
+            
+            var image = GetComponent<Image>();
+            if (image != null)
+            {
+                image.alphaHitTestMinimumThreshold = 0.1f;
+            }
         }
 
         private void Update()
@@ -119,6 +127,15 @@ namespace GGJ2026.Core.Managers
         private void OnBattleStart()
         {
         }
+        
+        private void OnRewardSelected(InGameEvent.OnRewardSelectedEvent e)
+        {
+            // 選択されたアイテムを画面に出現させる
+            ItemFactory.I.SpawnItem(e.SelectedItem);
+
+            // 次のフロアへ進む
+            OnRewardFinish();
+        }
 
         private void OnRewardStart()
         {
@@ -134,7 +151,7 @@ namespace GGJ2026.Core.Managers
         }
 
         [ContextMenu("End")]
-        private void EndGame()
+        public void EndGame()
         {
             GameManager.I.SetAliveTimer(aliveTimer);
             GameManager.I.SetResultFloor(currentFloor);

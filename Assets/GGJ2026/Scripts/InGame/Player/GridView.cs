@@ -1,5 +1,6 @@
 ﻿using GGJ2026.Core.Managers;
 using UnityEngine;
+using UnityEngine.EventSystems;
 
 namespace GGJ2026.InGame
 {
@@ -9,16 +10,23 @@ namespace GGJ2026.InGame
         [SerializeField] private int width = 3;
         [SerializeField] private int height = 3;
         [SerializeField] private float cellSize = 200f; 
+        
+        [Header("Boundary Settings")]
+        [SerializeField] private float backgroundWidth = 1085f;
+        [SerializeField] private float backgroundHeight = 950f;
 
         [Header("References")]
         [SerializeField] private RectTransform gridOrigin; 
         [SerializeField] private RectTransform itemContainer;
-        
 
         public RectTransform ItemContainer => itemContainer;
 
         private GridSystem gridSystem; 
         private Canvas rootCanvas;
+
+        private DraggableItem holdingItem = null;
+        private float lastPickupTime = 0f;
+        private const float PICKUP_COOLDOWN = 0.1f;
 
         private void Awake()
         {
@@ -28,139 +36,256 @@ namespace GGJ2026.InGame
         
         private void Start()
         {
-            SpawnDebugItem();
+            // SpawnDebugItem();
         }
 
-        private void SpawnDebugItem()
+        private void Update()
         {
-            ItemInstance instance = ItemFactory.I.ChooseItem();
-
-            bool placed = false;
-            for (int tryCount = 0; tryCount < 10; tryCount++)
+            if (holdingItem != null)
             {
-                int x = Random.Range(0, width);
-                int y = Random.Range(0, height);
+                FollowMouse(holdingItem);
 
-                if (gridSystem.CanPlaceItem(instance.Config, x, y))
+                if (Input.GetMouseButtonDown(0) && Time.time > lastPickupTime + PICKUP_COOLDOWN)
                 {
-                    // ★修正: instanceをそのまま渡す形に変更
-                    // (ここでConfigだけ渡すと、SpawnItem内で再抽選されてしまい、スキルが変わるため)
-                    SpawnItem(instance, x, y);
-                    placed = true;
-                    break;
+                    TryPlaceItem(Input.mousePosition);
                 }
-            }
-
-            if (!placed)
-            {
-                Debug.LogWarning($"[Debug] {instance.Config.itemName} を配置できる隙間が見つかりませんでした。");
             }
         }
         
-        public void SpawnItem(ItemInstance instance, int x, int y)
+        private void FollowMouse(DraggableItem item)
         {
-            ItemConfig config = instance.Config;
-
-            if (!gridSystem.CanPlaceItem(config, x, y))
-            {
-                Debug.LogWarning("初期配置に失敗：場所が空いていません");
-                return;
-            }
-
-            GameObject obj = Instantiate(config.prefab, itemContainer);
-            DraggableItem draggable = obj.GetComponent<DraggableItem>();
-
-            draggable.Initialize(instance, this, x, y);
-
-            gridSystem.PlaceItem(config, x, y);
-
-            if (instance.PassiveSkill != null)
-            {
-                InGameManager.I.EventBus.Publish(new InGameEvent.PassiveEffectEvent(instance.PassiveSkill, true));
-            }
-            
-            Vector2 pos = GetLocalPosFromGrid(x, y, config); 
-            draggable.UpdatePosition(x, y, pos);
-            
-            obj.transform.localScale = Vector3.one;
-        }
-
-        public void OnItemPickedUp(DraggableItem draggable)
-        {
-            gridSystem.RemoveItem(draggable.Config, draggable.CurrentGridX, draggable.CurrentGridY);
-            
-            if (draggable.Instance.PassiveSkill != null)
-            {
-                InGameManager.I.EventBus.Publish(new InGameEvent.PassiveEffectEvent(draggable.Instance.PassiveSkill, false));
-            }
-        }
-
-        public bool OnItemDropped(DraggableItem draggable, Vector2 screenPosition)
-        {
-            Camera cam = null;
-            if (rootCanvas.renderMode != RenderMode.ScreenSpaceOverlay)
-            {
-                cam = rootCanvas.worldCamera;
-                if (cam == null) cam = Camera.main; 
-            }
-
+            if (item == null) return;
             Vector2 localPoint;
             RectTransformUtility.ScreenPointToLocalPointInRectangle(
-                gridOrigin, 
-                screenPosition, 
-                cam, 
+                itemContainer, 
+                Input.mousePosition,
+                GetCanvasCamera(),
                 out localPoint
             );
-
-            int x = Mathf.FloorToInt(localPoint.x / cellSize);
-            int y = Mathf.FloorToInt(localPoint.y / cellSize);
+            item.transform.localPosition = localPoint;
+        }
+        
+        // --- 生成関連 ---
+        public void SpawnItem(ItemInstance instance, int x, int y)
+        {
+            GameObject obj = Instantiate(instance.Config.prefab, itemContainer);
+            obj.transform.localScale = Vector3.one; 
             
-            Debug.Log($"マウス位置: {localPoint}, 計算されたマス: [{x}, {y}]");
+            DraggableItem draggable = obj.GetComponent<DraggableItem>();
+            draggable.Initialize(instance, this, -1, -1);
 
-            if (gridSystem.CanPlaceItem(draggable.Config, x, y))
+            if (x == -1 || y == -1)
             {
-                gridSystem.PlaceItem(draggable.Config, x, y);
-                SnapItemToGrid(draggable, x, y);
-                
-                if (draggable.Instance.PassiveSkill != null)
+                if (!PlaceItemOutside(draggable))
                 {
-                    InGameManager.I.EventBus.Publish(new InGameEvent.PassiveEffectEvent(draggable.Instance.PassiveSkill, true));
+                    float fallbackX = -200f; 
+                    float fallbackY = 300f;
+                    draggable.UpdatePosition(-1, -1, new Vector2(fallbackX, fallbackY));
                 }
-
-                Debug.Log($"Item Placed at [{x},{y}]");
-                return true; 
             }
             else
             {
-                Debug.Log("Cannot place item here.");
-                return false; 
+                if (!gridSystem.CanPlaceItem(instance.Config, x, y))
+                {
+                    Debug.LogWarning("初期配置失敗。外側に配置します。");
+                    PlaceItemOutside(draggable);
+                    return;
+                }
+                draggable.Initialize(instance, this, x, y);
+                gridSystem.PlaceItem(instance.Config, x, y);
+                if (instance.PassiveSkill != null)
+                    InGameManager.I.EventBus.Publish(new InGameEvent.PassiveEffectEvent(instance.PassiveSkill, true));
+                
+                draggable.UpdatePosition(x, y, GetLocalPosFromGrid(x, y, instance.Config));
             }
         }
 
-        public void RevertPlacement(DraggableItem draggable, int originalX, int originalY)
+        // --- クリック・配置ロジック ---
+        public void OnItemClicked(DraggableItem item)
         {
-             gridSystem.PlaceItem(draggable.Config, originalX, originalY);
+            if (holdingItem != null) return;
+
+            holdingItem = item;
+            lastPickupTime = Time.time; 
+
+            // ★追加: アイテムを持ち上げたタイミングで詳細ポップアップを表示
+            if (UiManager.I != null)
+            {
+                UiManager.I.OpenMaskDescriptionPopup(true, item.Instance);
+            }
+
+            // グリッド内にある場合のみ、削除処理とパラメータ減算を行う
+            if (item.CurrentGridX != -1 && item.CurrentGridY != -1)
+            {
+                // グリッドデータから削除
+                gridSystem.RemoveItem(item.Config, item.CurrentGridX, item.CurrentGridY);
+
+                // ステータス解除 (装備されていた場合のみ実行)
+                if (item.Instance.PassiveSkill != null)
+                {
+                    InGameManager.I.EventBus.Publish(new InGameEvent.PassiveEffectEvent(item.Instance.PassiveSkill, false));
+                }
+            }
+
+            item.SetRaycastBlock(false);
+            item.transform.SetAsLastSibling();
+
+            Debug.Log($"Picked up: {item.Config.itemName}");
         }
 
-        private void SnapItemToGrid(DraggableItem draggable, int x, int y)
+        /// <summary>
+        /// 指定座標への配置を試みる
+        /// </summary>
+        private void TryPlaceItem(Vector2 screenPosition)
         {
-            draggable.transform.SetParent(itemContainer);
-            
-            Vector2 snapPos = GetLocalPosFromGrid(x, y, draggable.Config);
-            
-            draggable.UpdatePosition(x, y, snapPos); 
-            draggable.transform.localScale = Vector3.one; 
+            if (holdingItem == null) return;
+
+            // 1. itemContainer (600x600) の範囲内かチェック
+            if (RectTransformUtility.RectangleContainsScreenPoint(itemContainer, screenPosition, GetCanvasCamera()))
+            {
+                // --- グリッド内 ---
+                Vector2 localPoint;
+                RectTransformUtility.ScreenPointToLocalPointInRectangle(
+                    itemContainer, 
+                    screenPosition, 
+                    GetCanvasCamera(), 
+                    out localPoint
+                );
+                
+                Vector2 itemSize = holdingItem.GetComponent<RectTransform>().sizeDelta;
+                
+                // アイテムの左下の座標を計算
+                float itemLeftX = localPoint.x - (itemSize.x / 2f);
+                float itemBottomY = localPoint.y - (itemSize.y / 2f);
+
+                int x = Mathf.RoundToInt(itemLeftX / cellSize);
+                int y = Mathf.RoundToInt(itemBottomY / cellSize);
+
+                // 配置可能チェック
+                if (gridSystem.CanPlaceItem(holdingItem.Config, x, y))
+                {
+                    gridSystem.PlaceItem(holdingItem.Config, x, y);
+                    holdingItem.UpdatePosition(x, y, GetLocalPosFromGrid(x, y, holdingItem.Config));
+
+                    // グリッドに置くので装備(加算)イベントを発行
+                    if (holdingItem.Instance.PassiveSkill != null)
+                        InGameManager.I.EventBus.Publish(new InGameEvent.PassiveEffectEvent(holdingItem.Instance.PassiveSkill, true));
+
+                    Debug.Log($"[GridView] 配置成功: Grid[{x},{y}]");
+                    FinishPlacement();
+                }
+                else
+                {
+                    Debug.Log($"[GridView] 配置失敗: Grid[{x},{y}] は埋まっているか、はみ出しています。");
+                    // 持ち上げたまま
+                }
+            }
+            else
+            {
+                // --- グリッド外 ---
+                Debug.Log("グリッド範囲外をクリック -> 装備を外して配置します");
+                if (PlaceItemOutside(holdingItem))
+                {
+                    FinishPlacement();
+                }
+                else
+                {
+                    Debug.LogWarning("外側に置くスペースがありませんでした。");
+                }
+            }
+        }
+
+        private void FinishPlacement()
+        {
+            if (holdingItem != null)
+            {
+                // ★追加: 配置完了（ドロップ）したらポップアップを閉じる
+                if (UiManager.I != null)
+                {
+                    UiManager.I.OpenMaskDescriptionPopup(false, null);
+                }
+
+                holdingItem.SetRaycastBlock(true); 
+                holdingItem = null;
+            }
+        }
+
+        private Camera GetCanvasCamera()
+        {
+            if (rootCanvas.renderMode == RenderMode.ScreenSpaceOverlay) return null;
+            return rootCanvas.worldCamera != null ? rootCanvas.worldCamera : Camera.main;
         }
 
         private Vector2 GetLocalPosFromGrid(int x, int y, ItemConfig config)
         {
-            float widthOffset = (config.width * cellSize) / 2f;
-            float heightOffset = (config.height * cellSize) / 2f;
+            float centerX = (x * cellSize) + (config.width * cellSize) / 2f;
+            float centerY = (y * cellSize) + (config.height * cellSize) / 2f;
             
-            return new Vector2(
-                x * cellSize + widthOffset, 
-                y * cellSize + heightOffset
-            );
+            return new Vector2(centerX, centerY);
+        }
+
+        private bool PlaceItemOutside(DraggableItem targetItem)
+        {
+            float leftSpaceWidth = (backgroundWidth - (width * cellSize)) / 2f; 
+            float margin = 10f;
+            
+            Vector2 itemSize = targetItem.GetComponent<RectTransform>().sizeDelta;
+
+            for (int i = 0; i < 50; i++)
+            {
+                bool isLeft = Random.Range(0, 2) == 0;
+                float x, y;
+
+                if (isLeft)
+                {
+                    float minX = -leftSpaceWidth + margin;
+                    float maxX = 0 - margin;
+                    x = Random.Range(minX, maxX);
+                }
+                else
+                {
+                    float minX = (width * cellSize) + margin;
+                    float maxX = (width * cellSize) + leftSpaceWidth - margin;
+                    x = Random.Range(minX, maxX);
+                }
+                
+                float bottomLimit = -(backgroundHeight - (height * cellSize)) / 2f;
+                float topLimit = (height * cellSize) + (backgroundHeight - (height * cellSize)) / 2f;
+                
+                y = Random.Range(bottomLimit + margin, topLimit - margin);
+
+                if (!CheckOverlapWithExistingItems(targetItem, new Vector2(x, y)))
+                {
+                    targetItem.transform.SetParent(itemContainer);
+                    targetItem.UpdatePosition(-1, -1, new Vector2(x, y));
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        private bool CheckOverlapWithExistingItems(DraggableItem targetItem, Vector2 targetPos)
+        {
+            Vector2 itemSize = targetItem.GetComponent<RectTransform>().sizeDelta;
+            Rect targetRect = new Rect(targetPos.x - itemSize.x / 2f, targetPos.y - itemSize.y / 2f, itemSize.x, itemSize.y);
+
+            foreach (Transform child in itemContainer)
+            {
+                if (child == targetItem.transform) continue;
+                DraggableItem otherItem = child.GetComponent<DraggableItem>();
+                if (otherItem != null)
+                {
+                    RectTransform otherRT = otherItem.GetComponent<RectTransform>();
+                    Rect otherRect = new Rect(
+                        otherRT.anchoredPosition.x - otherRT.sizeDelta.x / 2f,
+                        otherRT.anchoredPosition.y - otherRT.sizeDelta.y / 2f,
+                        otherRT.sizeDelta.x,
+                        otherRT.sizeDelta.y
+                    );
+                    if (targetRect.Overlaps(otherRect)) return true; 
+                }
+            }
+            return false;
         }
     }
 }

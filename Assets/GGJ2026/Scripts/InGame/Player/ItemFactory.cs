@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
-using System.Linq; // 重み抽選に必要
-using GGJ2026.Core.Managers; // Singletonの場所に合わせて変更してください
+using System.Linq; 
+using GGJ2026.Core.Managers; 
 using UnityEngine;
 
 namespace GGJ2026.InGame
@@ -15,35 +15,31 @@ namespace GGJ2026.InGame
         [Header("パッシブスキルリスト")]
         [SerializeField] private List<PassiveSkillConfig> allPassiveSkillPool;
         
-        [Header("スポーン設定")]
-        [SerializeField] private Transform itemContainer; // アイテムの生成親（Canvas内のItemContainerなど）
-        [SerializeField] private GridView gridView;       // DraggableItemの初期化に必要
-        [SerializeField] private float minSpawnRadius = 600f; // グリッド中心からの最小距離（グリッド枠外になるように調整）
-        [SerializeField] private float maxSpawnRadius = 800f; // グリッド中心からの最大距離
+        [Header("参照")]
+        [SerializeField] private GridView gridView; // 配置ロジックを持つGridViewへの参照
+        
+        // ★修正: 配置はGridViewに任せるため、ここでのContainerやRadius設定は削除しました
 
         private new void Awake()
         {
             InitializeSingleton();
         }
         
+        /// <summary>
+        /// アイテムを生成して配置する（配置場所はGridView任せ）
+        /// </summary>
         public void SpawnItem(ItemInstance instance)
         {
-            Transform parent = itemContainer;
-            
-            GameObject obj = Instantiate(instance.Config.prefab, parent);
-            
-            Vector2 randomDir = Random.insideUnitCircle.normalized;
-            float distance = Random.Range(minSpawnRadius, maxSpawnRadius);
-            
-            obj.transform.localPosition = randomDir * distance;
-            
-            DraggableItem draggable = obj.GetComponent<DraggableItem>();
-            if (draggable != null)
+            if (gridView != null)
             {
-                draggable.Initialize(instance, gridView, -1, -1);
+                // GridViewに生成と配置を依頼する
+                // (-1, -1) を渡すことで「グリッド外（未装備）」として扱わせる
+                gridView.SpawnItem(instance, -1, -1);
             }
-            
-            Debug.Log($"Item Spawned Outside: {instance.Config.itemName} at {obj.transform.localPosition}");
+            else
+            {
+                Debug.LogError("ItemFactory: GridView の参照が設定されていません！Inspectorを確認してください。");
+            }
         }
 
         public ItemInstance ChooseItem()
@@ -59,16 +55,12 @@ namespace GGJ2026.InGame
             return CreateItem(selectedConfig);
         }
 
-        /// <summary>
-        /// アイテムデータを生成する
-        /// </summary>
         public ItemInstance CreateItem(ItemConfig config)
         {
             if (config == null) return null;
 
             var instance = new ItemInstance(config);
 
-            // 1. アクティブスキルの生成
             if (config.activeSkill != null)
             {
                 instance.SetActiveSkill(new ActiveSkillInstance(config.activeSkill));
