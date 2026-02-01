@@ -1849,6 +1849,8 @@ MonoBehaviour:
   allPassiveSkillPool:
   - {fileID: 11400000, guid: 8ffa5cb57b1c94343bf7777026b4b9a3, type: 2}
   - {fileID: 11400000, guid: 38bf1b4a662340e4bbf10e3cbea9c7be, type: 2}
+  - {fileID: 11400000, guid: 298901e08ef134244905982b33be5f65, type: 2}
+  growthRatePerFloor: 0.1
   gridView: {fileID: 5924401519896384223}
 --- !u!1 &2509731528350928788
 GameObject:
@@ -7796,8 +7798,13 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: -111794648916539931, guid: 309cf0b011e2e1a4b81efcb3871d2413,
         type: 3}
+      propertyPath: maxHp
+      value: 1000
+      objectReference: {fileID: 0}
+    - target: {fileID: -111794648916539931, guid: 309cf0b011e2e1a4b81efcb3871d2413,
+        type: 3}
       propertyPath: currentHp
-      value: 100
+      value: 1000
       objectReference: {fileID: 0}
     - target: {fileID: -111794648916539931, guid: 309cf0b011e2e1a4b81efcb3871d2413,
         type: 3}

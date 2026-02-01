@@ -16,7 +16,7 @@ namespace GGJ2026.InGame
             Debug.Log("--- アイテム生成テスト開始 ---");
 
             // 1. ファクトリーを使ってランダムにアイテムデータを生成 (データ作成)
-            ItemInstance item = ItemFactory.I.ChooseItem();
+            ItemInstance item = ItemFactory.I.ChooseItem(1);
 
             if (item != null)
             {

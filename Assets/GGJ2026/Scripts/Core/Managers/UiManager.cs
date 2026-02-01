@@ -351,9 +351,10 @@ namespace GGJ2026.Core.Managers
         private void SetRewardView(int index, ItemInstance rewardItem)
         {
             rewardText[index].text =
-                $"ActiveSkill\n{rewardItem.Config.activeSkill.skillName}\n" +
+                $"<color=\"red\">ActiveSkill\n</color>" +
                 $"{rewardItem.Config.activeSkill.description}\n" +
-                $"PassiveSkill\n{rewardItem.PassiveSkill.Config._skillName}\n" +
+                $"\n" +
+                $"<color=#005500>PassiveSkill\n</color>" +
                 $"{rewardItem.PassiveSkill.GetDescription()}\n";
 
             rewardImage[index].sprite = rewardItem.Config.itemSprite;

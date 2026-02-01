@@ -14,35 +14,33 @@ namespace GGJ2026.InGame
         
         [Header("パッシブスキルリスト")]
         [SerializeField] private List<PassiveSkillConfig> allPassiveSkillPool;
+
+        [Header("成長設定")]
+        [SerializeField, Tooltip("1フロアごとのステータス上昇率 (例: 0.1 = +10%)")]
+        private float growthRatePerFloor = 0.1f;
         
         [Header("参照")]
-        [SerializeField] private GridView gridView; // 配置ロジックを持つGridViewへの参照
-        
-        // ★修正: 配置はGridViewに任せるため、ここでのContainerやRadius設定は削除しました
+        [SerializeField] private GridView gridView;
 
         private new void Awake()
         {
             InitializeSingleton();
         }
         
-        /// <summary>
-        /// アイテムを生成して配置する（配置場所はGridView任せ）
-        /// </summary>
         public void SpawnItem(ItemInstance instance)
         {
             if (gridView != null)
             {
-                // GridViewに生成と配置を依頼する
-                // (-1, -1) を渡すことで「グリッド外（未装備）」として扱わせる
                 gridView.SpawnItem(instance, -1, -1);
             }
             else
             {
-                Debug.LogError("ItemFactory: GridView の参照が設定されていません！Inspectorを確認してください。");
+                Debug.LogError("ItemFactory: GridView の参照が設定されていません！");
             }
         }
 
-        public ItemInstance ChooseItem()
+        // ★修正: floorを受け取る
+        public ItemInstance ChooseItem(int floor)
         {
             if (allItemConfig == null || allItemConfig.Count == 0)
             {
@@ -52,10 +50,11 @@ namespace GGJ2026.InGame
             int index = Random.Range(0, allItemConfig.Count);
             ItemConfig selectedConfig = allItemConfig[index];
 
-            return CreateItem(selectedConfig);
+            return CreateItem(selectedConfig, floor);
         }
 
-        public ItemInstance CreateItem(ItemConfig config)
+        // ★修正: floorを受け取る
+        public ItemInstance CreateItem(ItemConfig config, int floor)
         {
             if (config == null) return null;
 
@@ -69,7 +68,8 @@ namespace GGJ2026.InGame
             var randomConfig = GetRandomPassiveConfigFromPool();
             if (randomConfig != null)
             {
-                instance.SetPassiveSkill(new PassiveSkillInstance(randomConfig));
+                // ★修正: フロアと成長率を渡して数値を計算させる
+                instance.SetPassiveSkill(new PassiveSkillInstance(randomConfig, floor, growthRatePerFloor));
             }
 
             return instance;

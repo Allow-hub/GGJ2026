@@ -1,6 +1,4 @@
-﻿
-
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace GGJ2026.InGame
 {
@@ -9,15 +7,30 @@ namespace GGJ2026.InGame
         public PassiveSkillConfig Config { get; private set; }
         public float Value { get; private set; }
 
-        public PassiveSkillInstance(PassiveSkillConfig config)
+        // ★修正: floor と growthRate を受け取る
+        public PassiveSkillInstance(PassiveSkillConfig config, int floor, float growthRate)
         {
             Config = config;
-            Value = Random.Range(config._minValue, config._maxValue);
+
+            // 1. ベースとなるランダム値を決定
+            float baseValue = Random.Range(config._minValue, config._maxValue);
+
+            // 2. 階層補正を計算 (1階層目は補正なし)
+            // floor が 1 未満にならないように Max(1, floor) を使用
+            int floorIndex = Mathf.Max(0, floor - 1);
+            float multiplier = 1.0f + (floorIndex * growthRate);
+
+            // 3. 最終値を計算
+            Value = baseValue * multiplier;
+            
+            // もし整数で扱いたいパラメータの場合は RoundToInt などしてください
+            // Value = Mathf.Round(Value); 
         }
 
         public string GetDescription()
         {
-            return $"{Config._skillName}: {Config._modifierType} {Value:F1}";
+            // F1 = 小数点第1位まで表示
+            return $"{Config._skillName}: \n+ {Value:F1}";
         }
     }
     
