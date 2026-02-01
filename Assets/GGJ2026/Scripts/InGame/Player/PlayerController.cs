@@ -27,10 +27,22 @@ namespace GGJ2026.InGame
         [Header("Attack Settings")]
         [SerializeField] private float baseAttackInterval = 2.0f; 
         [SerializeField] private CharacterSpriteAnimator characterSpriteAnimator;
+        
+        // ★修正: パーティクルではなく、スプライトを使ったフラッシュ演出に変更
+        [Header("Effects")]
+        [SerializeField] private SpriteRenderer mainSpriteRenderer; // プレイヤー自身のSpriteRenderer
+        [SerializeField] private SpriteRenderer flashSpriteRenderer; // 背後に配置する演出用SpriteRenderer
+        [SerializeField] private float flashDuration = 0.15f; // 光る時間
+        [SerializeField] private Color flashColor = new Color(1f, 1f, 0.7f, 1f); // 光の色（薄い黄色など）
+        [SerializeField] private Vector3 flashScale = new Vector3(1.2f, 1.2f, 1f); // どれくらい膨張させるか
+        
+        [Header("UI Effects")]
+        [SerializeField] private GameObject damagePopupPrefab;
+        [SerializeField] private Vector3 popupOffset = new Vector3(0, 1.5f, 0);
+
         private float attackTimer = 0f;
         private float currentAttackInterval;
 
-        // ★追加: 現在適用中のメインスキル（アクティブスキル）を保持
         private ActiveSkillInstance currentMainSkill;
 
         public int MaxHp => maxHp;
@@ -51,15 +63,19 @@ namespace GGJ2026.InGame
             currentHp = maxHp;
             currentAttackInterval = CalculateAttackInterval(speed);
             attackTimer = currentAttackInterval;
-            currentMainSkill = null; // 初期化
+            currentMainSkill = null;
             
+            // フラッシュ用スプライトは最初は非表示にしておく
+            if (flashSpriteRenderer != null)
+            {
+                flashSpriteRenderer.gameObject.SetActive(false);
+            }
+
             if (InGameManager.IsValid())
             {
                 InGameManager.I.EventBus.Subscribe<InGameEvent.PassiveEffectEvent>(OnPassiveEffect);
                 InGameManager.I.EventBus.Subscribe<ImproveEvents>(OnImprove);
                 InGameManager.I.EventBus.Subscribe<AttackEvents>(CheckDamage);
-
-                // メインマスク適用イベントの購読
                 InGameManager.I.EventBus.Subscribe<InGameEvent.ApplyMainMaskEvent>(OnApplyMainMask);
             }
         }
@@ -131,35 +147,70 @@ namespace GGJ2026.InGame
             if (InGameManager.IsValid() && InGameManager.I.EventBus != null)
             {
                 characterSpriteAnimator.PlayAttack();
-                AudioManager.I.PlaySE(Core.Audio.SEID.Attack);
-                // 必要であればここでEventBusにPublish
 
-                // ★修正: Attackスキルの場合、一時的に攻撃力を上げる
-                int originalAttackPower = attackPower; // 元の攻撃力を保存
+                // ★追加: 背後のフラッシュ演出を開始
+                if (flashSpriteRenderer != null && mainSpriteRenderer != null)
+                {
+                    // 以前のコルーチンが走っていたら止めて、新しく再生
+                    StopCoroutine(nameof(PlayFlashEffect));
+                    StartCoroutine(nameof(PlayFlashEffect));
+                }
+
+                // Attackスキルの場合、一時的に攻撃力を上げる
+                int originalAttackPower = attackPower;
                 bool isBuffed = false;
 
                 if (currentMainSkill != null && currentMainSkill.Config.effectTarget == EffectTarget.Attack)
                 {
-                    // 確率判定
                     float randomValue = UnityEngine.Random.Range(0f, 100f);
                     if (randomValue <= currentMainSkill.Config.probability)
                     {
-                        // 倍率適用
                         attackPower = Mathf.RoundToInt(attackPower * currentMainSkill.Config.multipler);
                         isBuffed = true;
                         Debug.Log($"[MainSkill] Attack Boost! {originalAttackPower} -> {attackPower}");
                     }
                 }
 
-                // イベント発行 (この時点で attackPower は強化されている可能性がある)
                 InGameManager.I.EventBus.Publish(new AttackEvents(this, EnemyFactory.I.CurrentEnemies[0]));
 
-                // ★修正: 攻撃が終わったら元の攻撃力に戻す
                 if (isBuffed)
                 {
                     attackPower = originalAttackPower;
                 }
             }
+        }
+
+        private IEnumerator PlayFlashEffect()
+        {
+            flashSpriteRenderer.gameObject.SetActive(true);
+            
+            flashSpriteRenderer.sprite = mainSpriteRenderer.sprite;
+            flashSpriteRenderer.flipX = mainSpriteRenderer.flipX;
+            
+            // 初期サイズ
+            flashSpriteRenderer.transform.localScale = flashScale;
+
+            // ★変更点: 設定されている色のアルファ値（透明度）を最大値として使う
+            float maxAlpha = flashColor.a; 
+            
+            float timer = 0f;
+
+            while (timer < flashDuration)
+            {
+                timer += Time.deltaTime;
+                float progress = timer / flashDuration; // 0 から 1 へ進む
+
+                // maxAlpha から 0 へ向かって薄くしていく
+                float currentAlpha = Mathf.Lerp(maxAlpha, 0f, progress);
+                
+                Color c = flashColor;
+                c.a = currentAlpha;
+                flashSpriteRenderer.color = c;
+
+                yield return null;
+            }
+
+            flashSpriteRenderer.gameObject.SetActive(false);
         }
 
         public void Attack(IDamageable target)
@@ -173,12 +224,26 @@ namespace GGJ2026.InGame
         {
             if (!IsAlive) return;
 
-            // ★修正: Defenceスキルの場合、ダメージを0.7倍にする
+            // Defenceスキルの軽減処理
             if (currentMainSkill != null && currentMainSkill.Config.effectTarget == EffectTarget.Defence)
             {
                 int originalDmg = damage;
                 damage = Mathf.RoundToInt(damage * 0.7f);
                 Debug.Log($"[MainSkill] Damage Reduced: {originalDmg} -> {damage}");
+            }
+
+            // ★追加: ダメージポップアップの表示
+            if (damagePopupPrefab != null)
+            {
+                // プレイヤーの少し左上あたりから出現させると「左から右へ」が綺麗に見えます
+                Vector3 spawnPos = transform.position + popupOffset + new Vector3(-0.5f, 0, 0);
+                
+                GameObject popup = Instantiate(damagePopupPrefab, spawnPos, Quaternion.identity);
+                DamagePopup damagePopup = popup.GetComponent<DamagePopup>();
+                if (damagePopup != null)
+                {
+                    damagePopup.Setup(damage);
+                }
             }
 
             currentHp -= damage;
@@ -245,26 +310,15 @@ namespace GGJ2026.InGame
             }
         }
 
-        // -----------------------------------------------------------------------
-        // メインマスク(アクティブスキル)関連
-        // -----------------------------------------------------------------------
-
         private void OnApplyMainMask(InGameEvent.ApplyMainMaskEvent e)
         {
             if (e.SelectedItem != null && e.SelectedItem.ActiveSkill != null)
             {
-                // 現在のスキルを更新
                 currentMainSkill = e.SelectedItem.ActiveSkill;
-                
-                // 静的な効果（Time, Point）のみここで適用
                 ApplyMainSkillStaticEffects(currentMainSkill);
             }
         }
 
-        /// <summary>
-        /// メインスキルのうち、装着時に一度だけ適用される効果 (Time, Point)
-        /// Attack, Defence は UpdateやTakeDamageで都度判定するためここでは何もしない
-        /// </summary>
         private void ApplyMainSkillStaticEffects(ActiveSkillInstance skillInstance)
         {
             ActiveSkillConfig config = skillInstance.Config;
@@ -275,15 +329,12 @@ namespace GGJ2026.InGame
             switch (config.effectTarget)
             {
                 case EffectTarget.Attack:
-                    // ここでは何もしない（攻撃時に確率発動）
                     break;
 
                 case EffectTarget.Defence:
-                    // ここでは何もしない（被ダメージ時に0.7倍）
                     break;
 
                 case EffectTarget.Time:
-                    // ★修正: 確率で残り時間を5秒追加
                     if (InGameManager.I != null)
                     {
                         float randomValue = UnityEngine.Random.Range(0f, 100f);
@@ -292,22 +343,17 @@ namespace GGJ2026.InGame
                             InGameManager.I.CurrentTime += 5f;
                             Debug.Log($"[MainMask] Time Extended: +5.0s (Chance: {config.probability}%)");
                         }
-                        else
-                        {
-                            Debug.Log($"[MainMask] Time Extension Failed (Chance: {config.probability}%)");
-                        }
                     }
                     break;
 
                 case EffectTarget.Point:
-                    // ポイント獲得（そのまま）
                     if (InGameManager.I != null)
                     {
                         float randomValue = UnityEngine.Random.Range(0f, 100f);
-                        if (randomValue > config.probability)
+                        if (randomValue <= config.probability)
                         {
                             InGameManager.I.SetPointMultiplier(multiplier);
-                            Debug.Log($"[MainMask] Points Add: {multiplier}");
+                            Debug.Log($"[MainMask] Points Multiplier Set: {multiplier}");
                         }
                     }
                     break;
