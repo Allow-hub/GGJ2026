@@ -51,7 +51,7 @@ namespace GGJ2026.Core.Managers
         private ItemInstance currentoOpenMaskItem;
         private GameObject currentoOpenMaskObject;
         [SerializeField] private TextMeshProUGUI floorText;//現在のフロアテキスト
-        [SerializeField] private TextMeshProUGUI hpText, atkText, spdText;
+        [SerializeField] private TextMeshProUGUI hpText, atkText, spdText, ptText;
 
         private int lastFloor = 0;
 
@@ -64,6 +64,7 @@ namespace GGJ2026.Core.Managers
         private int lastHp = 0;
         private int lastAtk = 0;
         private float lastSpd = 0;
+        private int lastPt = 0;
         // リワードアイテムの保持
         private ItemInstance[] currentRewardItems = new ItemInstance[3];
 
@@ -106,6 +107,11 @@ namespace GGJ2026.Core.Managers
             // ボタンの有効/無効を更新
             UpdateButtonStates();
             UpdateStatusTexts();
+            if(PointManager.I.Points != lastPt)
+            {
+                lastPt = PointManager.I.Points;
+                ptText.text = lastPt.ToString();
+            }
             if (InGameManager.I.CurrentFloor != lastFloor)
             {
                 lastFloor = InGameManager.I.CurrentFloor;

@@ -59,6 +59,7 @@ namespace GGJ2026.Core.Managers
                     break;
 
                 case GameState.InGame:
+                    AudioManager.I.PlayBGM(BGMID.Battle);
                     SetAliveTimer(0);
                     SetResultFloor(0);
                     currentRoot = Instantiate(inGamePrefab);
