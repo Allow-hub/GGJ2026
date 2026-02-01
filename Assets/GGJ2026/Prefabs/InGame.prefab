@@ -1982,7 +1982,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c4486872a0faea84397d5ae8efee7219, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  gameDuration: 90
+  gameDuration: 180
   countdownText: {fileID: 4244894160938896044}
   canvasGroup: {fileID: 2846042365098892552}
   playerController: {fileID: 1054004862226398655}
@@ -2045,7 +2045,7 @@ MonoBehaviour:
   basePointCost: 10
   costMultiplier: 1.5
   healBasePointCost: 50
-  healCostMultiplier: 2
+  healCostMultiplier: 1.1
   timerSlider: {fileID: 592206023392869989}
   timerFillImage: {fileID: 4536982582246252011}
   timerStartColor: {r: 1, g: 0.07453512, b: 0, a: 1}
