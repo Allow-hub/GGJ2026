@@ -332,6 +332,7 @@ GameObject:
   - component: {fileID: 3080825361714469675}
   - component: {fileID: 995363029125875367}
   - component: {fileID: 3234167151267884635}
+  - component: {fileID: 7565563366961984583}
   m_Layer: 0
   m_Name: Enemy
   m_TagString: Untagged
@@ -387,6 +388,27 @@ MonoBehaviour:
   slider: {fileID: 4000502630502394059}
   isEnemy: 1
   lerpSpeed: 10
+--- !u!95 &7565563366961984583
+Animator:
+  serializedVersion: 5
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4064560364635670763}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: d46ddbbaf7bf4ae46bc257e487fa5f2f, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0
 --- !u!1 &4835256927871903146
 GameObject:
   m_ObjectHideFlags: 0
