@@ -46,9 +46,15 @@ namespace GGJ2026.Core.Managers
 
         [Header("タイマー関連")]
         [SerializeField] private Slider timerSlider;//タイマースライダー
-        [SerializeField] private Image timerFillImage;//スライダーの塗りつぶし画像（オプション）
+        [SerializeField] private Image timerFillImage;//スライダーの塗りつぶし画像(オプション)
         [SerializeField] private Color timerStartColor = Color.green;//開始時の色
         [SerializeField] private Color timerEndColor = Color.red;//終了時の色
+
+        [Header("スピードボタン関連")]
+        [SerializeField] private Button speedButton;
+        [SerializeField] private Image speedButtonImage; // ボタンの画像コンポーネント
+        [SerializeField] private Color speedNormalColor = new Color(0.7f, 0.7f, 0.7f, 1f); // 通常時(暗め)
+        [SerializeField] private Color speedFastColor = Color.white; // 高速時(真っ白)
 
         [SerializeField] private CanvasGroup maskDescriptionPopupCanvasGroup;//マスク説明ポップアップ
         [SerializeField] private TextMeshProUGUI maskDescriptionText;//マスク説明テキスト
@@ -72,6 +78,10 @@ namespace GGJ2026.Core.Managers
         private int lastAtk = 0;
         private float lastSpd = 0;
         private int lastPt = 0;
+        
+        // スピードボタンの状態
+        private bool isSpeedFast = false;
+
         // リワードアイテムの保持
         private ItemInstance[] currentRewardItems = new ItemInstance[3];
 
@@ -82,7 +92,7 @@ namespace GGJ2026.Core.Managers
             base.Init();
             ShowGrid();
 
-            // リスナーを削除してから追加（重複防止）
+            // リスナーを削除してから追加(重複防止)
             openImproveMenuButton.onClick.RemoveAllListeners();
             openImproveMenuButton.onClick.AddListener(() => ShowImproveMenu());
 
@@ -107,10 +117,26 @@ namespace GGJ2026.Core.Managers
 
             sellButton.onClick.RemoveAllListeners();
             sellButton.onClick.AddListener(() => OnSellMask());
+            
             // メインマスク適用ボタンのリスナー設定
             mainMaskApplyButton.onClick.RemoveAllListeners();
             mainMaskApplyButton.onClick.AddListener(() => OnMainMaskApply());
 
+            // スピードボタンのリスナー設定
+            if (speedButton != null)
+            {
+                speedButton.onClick.RemoveAllListeners();
+                speedButton.onClick.AddListener(() => ToggleGameSpeed());
+                
+                // speedButtonImageが設定されていない場合は自動取得
+                if (speedButtonImage == null)
+                {
+                    speedButtonImage = speedButton.GetComponent<Image>();
+                }
+                
+                // 初期状態を設定(通常速度、暗い色)
+                InitializeSpeedButton();
+            }
 
             // リワードボタンのリスナー設定
             for (int i = 0; i < rewardButtons.Length; i++)
@@ -156,6 +182,49 @@ namespace GGJ2026.Core.Managers
         }
 
         /// <summary>
+        /// スピードボタンの初期状態を設定
+        /// </summary>
+        private void InitializeSpeedButton()
+        {
+            isSpeedFast = false;
+            Time.timeScale = 1f;
+            
+            if (speedButtonImage != null)
+            {
+                speedButtonImage.color = speedNormalColor;
+            }
+        }
+
+        /// <summary>
+        /// ゲームスピードを切り替える
+        /// </summary>
+        private void ToggleGameSpeed()
+        {
+            isSpeedFast = !isSpeedFast;
+            
+            if (isSpeedFast)
+            {
+                // 高速モード
+                Time.timeScale = 2f;
+                if (speedButtonImage != null)
+                {
+                    speedButtonImage.color = speedFastColor;
+                }
+            }
+            else
+            {
+                // 通常モード
+                Time.timeScale = 1f;
+                if (speedButtonImage != null)
+                {
+                    speedButtonImage.color = speedNormalColor;
+                }
+            }
+            
+            AudioManager.I.PlaySE(SEID.ButtonClick);
+        }
+
+        /// <summary>
         /// タイマースライダーの初期化
         /// </summary>
         private void InitializeTimerSlider()
@@ -164,7 +233,7 @@ namespace GGJ2026.Core.Managers
             {
                 timerSlider.minValue = 0f;
                 timerSlider.maxValue = 1f;
-                timerSlider.value = 0f; // 初期値を0に（時間が経つと増える）
+                timerSlider.value = 0f; // 初期値を0に(時間が経つと増える)
                 timerSlider.interactable = false; // スライダーは操作不可
 
                 // Fill Imageがある場合は色を設定
@@ -190,13 +259,13 @@ namespace GGJ2026.Core.Managers
             float currentTime = InGameManager.I.CurrentTime;
             float gameDuration = InGameManager.I.GameDuration;
 
-            // 経過時間の割合を計算（0.0 = 開始, 1.0 = 終了）
+            // 経過時間の割合を計算(0.0 = 開始, 1.0 = 終了)
             float timeRatio = Mathf.Clamp01(currentTime / gameDuration);
 
-            // スライダーの値を更新（時間とともに増加）
+            // スライダーの値を更新(時間とともに増加)
             timerSlider.value = timeRatio;
 
-            // 色のグラデーションを更新（緑→赤へ）
+            // 色のグラデーションを更新(緑→赤へ)
             if (timerFillImage != null)
                 timerFillImage.color = Color.Lerp(timerStartColor, timerEndColor, timeRatio);
         }
