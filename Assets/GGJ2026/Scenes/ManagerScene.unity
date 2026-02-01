@@ -157,7 +157,7 @@ MonoBehaviour:
     type: 3}
   resultPrefab: {fileID: 2951112026172338060, guid: b4f85951b3e89374aa4070add59191f9,
     type: 3}
-  initialState: 1
+  initialState: 0
 --- !u!4 &351999350
 Transform:
   m_ObjectHideFlags: 0

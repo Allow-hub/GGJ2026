@@ -108,7 +108,6 @@ namespace GGJ2026.Core.Managers
             mainMaskApplyButton.onClick.RemoveAllListeners();
             mainMaskApplyButton.onClick.AddListener(() => OnMainMaskApply());
 
-            Debug.Log($"[UiManager] mainMaskApplyButton listener added. Button: {mainMaskApplyButton != null}");
 
             // リワードボタンのリスナー設定
             for (int i = 0; i < rewardButtons.Length; i++)
@@ -126,6 +125,12 @@ namespace GGJ2026.Core.Managers
             ptText.text = lastPt.ToString();
             // 初期テキスト更新
             UpdateLevelText();
+        }
+
+        private void OnDestroy()
+        {
+            if (!InGameManager.IsValid()) return;
+            InGameManager.I.EventBus.Unsubscribe<OnRewardStartEvent>(e => ShowReward(e));
         }
 
         private void Update()

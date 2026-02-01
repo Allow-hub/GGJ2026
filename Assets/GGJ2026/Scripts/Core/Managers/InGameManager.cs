@@ -60,6 +60,12 @@ namespace GGJ2026.Core.Managers
                 image.alphaHitTestMinimumThreshold = 0.1f;
         }
 
+        private void OnDestroy()
+        {
+            if (!IsValid()) return;
+            EventBus.Unsubscribe<InGameEvent.OnRewardSelectedEvent>(OnRewardSelected);
+        }
+
         private void Update()
         {
             if (CurrentState == InGameState.Result) return;
@@ -141,17 +147,26 @@ namespace GGJ2026.Core.Managers
             float floorMultiplier = 1f + (currentFloor - 1) * floorBonusRate;
             var pt = basePt * pointMultiplier * floorMultiplier;
             PointManager.I.AddPoints((int)pt);
-            var item_1 = ItemFactory.I.ChooseItem(currentFloor);
-            var item_2 = ItemFactory.I.ChooseItem(currentFloor);
-            var item_3 = ItemFactory.I.ChooseItem(currentFloor);
 
-            // 報酬UI表示 + 10秒カウント
-            eventBus.Publish(new InGameEvent.OnRewardStartEvent(item_1, item_2, item_3));
+            if (CurrentFloor % 10 == 1)
+            {
+                var item_1 = ItemFactory.I.ChooseItem(currentFloor);
+                var item_2 = ItemFactory.I.ChooseItem(currentFloor);
+                var item_3 = ItemFactory.I.ChooseItem(currentFloor);
+
+                // 報酬UI表示 + 10秒カウント
+                eventBus.Publish(new InGameEvent.OnRewardStartEvent(item_1, item_2, item_3));
+            }
+            else
+            {
+                OnRewardFinish();
+            }
         }
 
         [ContextMenu("End")]
         public void EndGame()
         {
+            if (GameManager.I == null) return;
             GameManager.I.SetAliveTimer(aliveTimer);
             GameManager.I.SetResultFloor(currentFloor);
             ChangeState(InGameState.Result);
