@@ -222,12 +222,18 @@ namespace GGJ2026.InGame
 
             if (RectTransformUtility.RectangleContainsScreenPoint(itemContainer, screenPosition, GetCanvasCamera()))
             {
-                Vector2 itemSize = holdingItem.GetComponent<RectTransform>().sizeDelta;
-                float itemLeftX = localPoint.x - (itemSize.x / 2f);
-                float itemBottomY = localPoint.y - (itemSize.y / 2f);
+                // itemConfigの幅高さを基準に計算（GetLocalPosFromGridとの整合性を取る）
+                float itemWidthPixels = holdingItem.Config.width * cellSize;
+                float itemHeightPixels = holdingItem.Config.height * cellSize;
+                float itemLeftX = localPoint.x - (itemWidthPixels / 2f);
+                float itemBottomY = localPoint.y - (itemHeightPixels / 2f);
 
                 int x = Mathf.RoundToInt(itemLeftX / cellSize);
                 int y = Mathf.RoundToInt(itemBottomY / cellSize);
+                
+                Debug.Log($"[GridView-DEBUG] マウス座標: screen={screenPosition}, local={localPoint}");
+                Debug.Log($"[GridView-DEBUG] アイテム大きさ: ({holdingItem.Config.width}, {holdingItem.Config.height}) cells = ({itemWidthPixels}, {itemHeightPixels}) pix");
+                Debug.Log($"[GridView-DEBUG] 計算グリッド座標: ({x}, {y})");
 
                 if (gridSystem.CanPlaceItem(holdingItem.Config, x, y))
                 {

@@ -2051,7 +2051,7 @@ MonoBehaviour:
   timerStartColor: {r: 1, g: 0.07453512, b: 0, a: 1}
   timerEndColor: {r: 0.23497665, g: 1, b: 0, a: 1}
   speedButton: {fileID: 6770100733933181352}
-  speedButtonImage: {fileID: 0}
+  speedButtonImage: {fileID: 9062448021740667555}
   speedNormalColor: {r: 0.7, g: 0.7, b: 0.7, a: 1}
   speedFastColor: {r: 1, g: 1, b: 1, a: 1}
   maskDescriptionPopupCanvasGroup: {fileID: 4784802912895724425}
@@ -5556,8 +5556,8 @@ MonoBehaviour:
   m_ReferencePixelsPerUnit: 100
   m_ScaleFactor: 1
   m_ReferenceResolution: {x: 1080, y: 1920}
-  m_ScreenMatchMode: 2
-  m_MatchWidthOrHeight: 0
+  m_ScreenMatchMode: 0
+  m_MatchWidthOrHeight: 1
   m_PhysicalUnit: 3
   m_FallbackScreenDPI: 96
   m_DefaultSpriteDPI: 96
@@ -6698,8 +6698,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: 521}
-  m_SizeDelta: {x: 1200, y: 1080}
+  m_AnchoredPosition: {x: 0, y: 469}
+  m_SizeDelta: {x: 1080, y: 970}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &5866560564769412636
 CanvasRenderer:
@@ -8101,8 +8101,8 @@ MonoBehaviour:
   m_ReferencePixelsPerUnit: 100
   m_ScaleFactor: 1
   m_ReferenceResolution: {x: 1080, y: 1920}
-  m_ScreenMatchMode: 2
-  m_MatchWidthOrHeight: 0
+  m_ScreenMatchMode: 0
+  m_MatchWidthOrHeight: 0.7
   m_PhysicalUnit: 3
   m_FallbackScreenDPI: 96
   m_DefaultSpriteDPI: 96
