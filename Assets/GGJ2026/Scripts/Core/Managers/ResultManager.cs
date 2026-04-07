@@ -17,7 +17,7 @@ namespace GGJ2026.Core.Managers
 
         private void Awake()
         {
-            scoreText.text = $"{PointManager.I.Points}";
+            scoreText.text = $"{PointManager.I.TotalPoints}";
             timeText.text = GameManager.I.AliveTimer.ToString("F0");
             stageText.text = $"{GameManager.I.ResultFloor}";
         }

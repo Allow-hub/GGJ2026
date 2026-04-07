@@ -158,7 +158,7 @@ namespace GGJ2026.InGame.Enemy
         [ContextMenu("OnDeath")]
         private void OnDeath()
         {
-            Debug.Log($"Enemy defeated on Floor {floor}");
+            // Debug.Log($"Enemy defeated on Floor {floor}");
             AudioManager.I.PlaySE(Core.Audio.SEID.Damage);
             EnemyFactory.I.DecrementEnemyCount(this);// 敵数を減らす
             // 死亡時の処理（アニメーション、ドロップなど）

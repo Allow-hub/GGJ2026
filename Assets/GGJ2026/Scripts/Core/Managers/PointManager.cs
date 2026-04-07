@@ -13,6 +13,8 @@ namespace GGJ2026.Core.Managers
         protected override bool UseDontDestroyOnLoad => true;
         [SerializeField, ReadOnly] private int points = 0;
         public int Points => points;
+        private int totalPoints = 0;
+        public int TotalPoints => totalPoints;
         public override void Init()
         {
             base.Init();
@@ -24,7 +26,11 @@ namespace GGJ2026.Core.Managers
         {
             AddPoints(200);
         }
-        public void AddPoints(int value) => points += value;
+        public void AddPoints(int value)
+        {
+            points += value;
+            totalPoints += value;
+        }
 
         /// <summary>
         /// ポイントを使用する
@@ -37,6 +43,10 @@ namespace GGJ2026.Core.Managers
             points -= value;
             return true;
         }
-        public void ResetPoints() => points = 0;
+        public void ResetPoints()
+        {
+            totalPoints = 0;
+            points = 0;
+        }
     }
 }
